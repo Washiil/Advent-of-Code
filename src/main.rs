@@ -1,16 +1,18 @@
-mod day01;
-mod day02;
-mod util;
+mod runner;
+mod days;
+mod utility;
 
-use std::time::{Duration, Instant};
-use util::{time_function};
+use crate::runner::Runner;
 
 fn main() {
-    println!("Welcome to Advent of Code 2023! Happy Holidays!");
 
-    let day1_part_1 = time_function(day01::part_1);
-    println!("Day01_1 | {:?} | {}", day1_part_1.0, day1_part_1.1);
+    let days: Vec<Box<dyn Runner>> = vec![
+        Box::new(days::day01::Day01),
+        Box::new(days::day02::Day02)
+    ];
 
-    let day1_part_2 = time_function(day01::part_2);
-    println!("Day01_2 | {:?} | {}", day1_part_2.0, day1_part_2.1);
+    for (i, day) in days.iter().enumerate() {
+        let duration = day.benchmark();
+        println!("Day {} | {:?}", i + 1, duration);
+    }
 }
