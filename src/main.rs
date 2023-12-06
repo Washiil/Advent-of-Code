@@ -8,7 +8,8 @@ fn main() {
     let days: Vec<Box<dyn Runner>> = vec![
         Box::new(days::day01::Day01),
         Box::new(days::day02::Day02),
-        Box::new(days::day03::Day03)
+        Box::new(days::day03::Day03),
+        Box::new(days::day04::Day04)
     ];
 
     println!("---------------------------------------------------");
