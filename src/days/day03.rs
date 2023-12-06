@@ -3,11 +3,10 @@ use crate::{runner::Runner, utility::read_lines};
 pub struct Day03;
 
 impl Day03 {
+    // This function must remove all letters it uses to avoid double counting hence the mutable reference
     fn number_from_line(&self, line: &mut Vec<char>, index: usize) -> u32 {
         let mut consecutive = String::new();
 
-        // This function must remove all letters it uses to avoid double counting hence the mutable reference
-    
         // Check to the left of the index
         for i in (0..index).rev() {
             if line[i].is_numeric() {
@@ -71,6 +70,39 @@ impl Runner for Day03 {
     }
 
     fn part_two(&self) -> u32 {
-        0
+        let mut total = 0;
+        if let Ok(lines) = read_lines("./input/day03.txt") {
+            let mut data: Vec<Vec<char>> = Vec::new();
+
+            for line in lines {
+                if let Ok(value) = line {
+                    data.push(value.chars().collect());
+                }
+            }
+
+            let rows = data.len();
+            let cols = data[0].len();
+
+            for row in 1..rows {
+                for col in 1..cols {
+                    if data[row][col] == '*' {
+                        // We found a nuumber so symbol so its time to perform a check
+                        let mut gears: Vec<u32> = vec![];
+                        for modified_row in row - 1..=row + 1 {
+                            for modified_col in col - 1..=col + 1 {
+                                if data[modified_row][modified_col].is_numeric() {
+                                    let line_sum = self.number_from_line(&mut data[modified_row], modified_col);
+                                    gears.push(line_sum);
+                                }
+                            }
+                        }
+                        if gears.len() == 2 {
+                            total += gears.iter().fold(1, |acc, x| acc * x);
+                        }
+                    }
+                }
+            }
+        }
+        return total;
     }
 }
