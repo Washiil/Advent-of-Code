@@ -14,41 +14,39 @@ impl Runner for Day02 {
             ("green", 13),
             ("blue", 14),
         ]);
+
+        let lines = read_lines("./input/day02.txt");
         
-        if let Ok(lines) = read_lines("./input/day02.txt") {
-            for line in lines {
-                if let Ok(value) = line {
-                    let x = value.strip_prefix("Game ").unwrap();
-                    let data: Vec<&str> = x.split(":").collect();
+        for line in lines {
+            let x = line.strip_prefix("Game ").unwrap();
+            let data: Vec<&str> = x.split(":").collect();
 
-                    let match_num: u32 = data[0].parse().unwrap();
-                    let mut valid = true;
+            let match_num: u32 = data[0].parse().unwrap();
+            let mut valid = true;
 
-                    let draws: Vec<&str> = data[1].split(";").collect();
-                    
-                    'outer: for draw in draws {
-                        let dice: Vec<&str> = draw.split(",").collect();
-                        for die in dice {
-                            let parts: Vec<&str> = die.trim().split(" ").collect();
+            let draws: Vec<&str> = data[1].split(";").collect();
+            
+            'outer: for draw in draws {
+                let dice: Vec<&str> = draw.split(",").collect();
+                for die in dice {
+                    let parts: Vec<&str> = die.trim().split(" ").collect();
 
-                            let count: u32 = parts[0].parse().unwrap();
-                            let colour = parts[1];
+                    let count: u32 = parts[0].parse().unwrap();
+                    let colour = parts[1];
 
-                            match colours.get(colour) {
-                                Some(col) => {
-                                    if &count > col {
-                                        valid = false;
-                                        break 'outer;
-                                    }
-                                },
-                                None => panic!("Incorrect Input")
+                    match colours.get(colour) {
+                        Some(col) => {
+                            if &count > col {
+                                valid = false;
+                                break 'outer;
                             }
-                        }
-                    }
-                    if valid {
-                        total += match_num;
+                        },
+                        None => panic!("Incorrect Input")
                     }
                 }
+            }
+            if valid {
+                total += match_num;
             }
         }
         return total;
@@ -56,44 +54,41 @@ impl Runner for Day02 {
 
     fn part_two(&self) -> u32 {
         let mut total = 0;
-        
-        if let Ok(lines) = read_lines("./input/day02.txt") {
+
+        let lines = read_lines("./input/day02.txt");
             for line in lines {
-                if let Ok(value) = line {
-                    let x = value.strip_prefix("Game ").unwrap();
-                    let data: Vec<&str> = x.split(":").collect();
+                let x = line.strip_prefix("Game ").unwrap();
+                let data: Vec<&str> = x.split(":").collect();
 
-                    let mut colours: HashMap<&str, u32> = HashMap::from([
-                        ("red", 0),
-                        ("green", 0),
-                        ("blue", 0),
-                    ]);
+                let mut colours: HashMap<&str, u32> = HashMap::from([
+                    ("red", 0),
+                    ("green", 0),
+                    ("blue", 0),
+                ]);
 
-                    let draws: Vec<&str> = data[1].split(";").collect();
-                    
-                    for draw in draws {
-                        let dice: Vec<&str> = draw.split(",").collect();
-                        for die in dice {
-                            let parts: Vec<&str> = die.trim().split(" ").collect();
+                let draws: Vec<&str> = data[1].split(";").collect();
+                
+                for draw in draws {
+                    let dice: Vec<&str> = draw.split(",").collect();
+                    for die in dice {
+                        let parts: Vec<&str> = die.trim().split(" ").collect();
 
-                            let count: u32 = parts[0].parse().unwrap();
-                            let colour = parts[1];
-                            
-                            match colours.get_mut(colour) {
-                                Some(col) => {
-                                    if &count > col {
-                                        *col = count
-                                    }
-                                },
-                                None => panic!("Incorrect Input")
-                            }
+                        let count: u32 = parts[0].parse().unwrap();
+                        let colour = parts[1];
+                        
+                        match colours.get_mut(colour) {
+                            Some(col) => {
+                                if &count > col {
+                                    *col = count
+                                }
+                            },
+                            None => panic!("Incorrect Input")
                         }
                     }
-                    let product: u32 = colours.values().fold(1, |acc, x| acc * x);
-                    total += product;
                 }
+                let product: u32 = colours.values().fold(1, |acc, x| acc * x);
+                total += product;
             }
-        }
         return total;
     }
 }

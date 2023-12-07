@@ -2,6 +2,8 @@ mod runner;
 mod days;
 mod utility;
 
+use std::io::{Read, stdin};
+
 use crate::runner::Runner;
 
 fn main() {
@@ -12,11 +14,16 @@ fn main() {
         Box::new(days::day04::Day04)
     ];
 
-    println!("---------------------------------------------------");
-    println!("Day    | Value 1        | Value 2        | Duration");
-    println!("---------------------------------------------------");
+    println!("------------------------------------------------------------------------------");
+    println!("│ Day    │ Part 1         │ Duration 1     │ Part 2         │ Duration 2     │");
+    println!("------------------------------------------------------------------------------");
     for (i, day) in days.iter().enumerate() {
-        let duration = day.benchmark();
-        println!("Day {:0>2} | {: <14} | {: <14} | {:?}", i + 1, &duration.0, &duration.1, &duration.2);
+        let benchmark = day.benchmark();
+        println!("│ Day {:0>2} │ {: <14} │ {: <14?} │ {: <14} │ {: <14?} │", i + 1, &benchmark.0, &benchmark.2, &benchmark.1, &benchmark.3);
     }
+    println!("------------------------------------------------------------------------------");
+
+    println!("Press Enter to exit...");
+    // let mut input = String::new();
+    // stdin().read_line(&mut input).expect("Failed to read line");
 }

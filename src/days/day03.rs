@@ -38,28 +38,26 @@ impl Day03 {
 impl Runner for Day03 {
     fn part_one(&self) -> u32 {
         let mut total = 0;
-        if let Ok(lines) = read_lines("./input/day03.txt") {
-            let mut data: Vec<Vec<char>> = Vec::new();
+        let lines = read_lines("./input/day03.txt");
 
-            for line in lines {
-                if let Ok(value) = line {
-                    data.push(value.chars().collect());
-                }
-            }
+        let mut data: Vec<Vec<char>> = Vec::new();
 
-            let rows = data.len();
-            let cols = data[0].len();
+        for line in lines {
+            data.push(line.chars().collect());
+        }
 
-            for row in 1..rows {
-                for col in 1..cols {
-                    if !data[row][col].is_numeric() && data[row][col] != '.' {
-                        // We found a nuumber so symbol so its time to perform a check
-                        for modified_row in row - 1..=row + 1 {
-                            for modified_col in col - 1..=col + 1 {
-                                if data[modified_row][modified_col].is_numeric() {
-                                    let line_sum = self.number_from_line(&mut data[modified_row], modified_col);
-                                    total += line_sum;
-                                }
+        let rows = data.len();
+        let cols = data[0].len();
+
+        for row in 1..rows {
+            for col in 1..cols {
+                if !data[row][col].is_numeric() && data[row][col] != '.' {
+                    // We found a nuumber so symbol so its time to perform a check
+                    for modified_row in row - 1..=row + 1 {
+                        for modified_col in col - 1..=col + 1 {
+                            if data[modified_row][modified_col].is_numeric() {
+                                let line_sum = self.number_from_line(&mut data[modified_row], modified_col);
+                                total += line_sum;
                             }
                         }
                     }
@@ -71,34 +69,31 @@ impl Runner for Day03 {
 
     fn part_two(&self) -> u32 {
         let mut total = 0;
-        if let Ok(lines) = read_lines("./input/day03.txt") {
-            let mut data: Vec<Vec<char>> = Vec::new();
+        let lines = read_lines("./input/day03.txt");
+        let mut data: Vec<Vec<char>> = Vec::new();
 
-            for line in lines {
-                if let Ok(value) = line {
-                    data.push(value.chars().collect());
-                }
-            }
+        for line in lines {
+            data.push(line.chars().collect());
+        }
 
-            let rows = data.len();
-            let cols = data[0].len();
+        let rows = data.len();
+        let cols = data[0].len();
 
-            for row in 1..rows {
-                for col in 1..cols {
-                    if data[row][col] == '*' {
-                        // We found a nuumber so symbol so its time to perform a check
-                        let mut gears: Vec<u32> = vec![];
-                        for modified_row in row - 1..=row + 1 {
-                            for modified_col in col - 1..=col + 1 {
-                                if data[modified_row][modified_col].is_numeric() {
-                                    let line_sum = self.number_from_line(&mut data[modified_row], modified_col);
-                                    gears.push(line_sum);
-                                }
+        for row in 1..rows {
+            for col in 1..cols {
+                if data[row][col] == '*' {
+                    // We found a nuumber so symbol so its time to perform a check
+                    let mut gears: Vec<u32> = vec![];
+                    for modified_row in row - 1..=row + 1 {
+                        for modified_col in col - 1..=col + 1 {
+                            if data[modified_row][modified_col].is_numeric() {
+                                let line_sum = self.number_from_line(&mut data[modified_row], modified_col);
+                                gears.push(line_sum);
                             }
                         }
-                        if gears.len() == 2 {
-                            total += gears.iter().fold(1, |acc, x| acc * x);
-                        }
+                    }
+                    if gears.len() == 2 {
+                        total += gears.iter().fold(1, |acc, x| acc * x);
                     }
                 }
             }
