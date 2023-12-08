@@ -8,6 +8,7 @@ pub struct Day02;
 impl Runner for Day02 {
     fn part_one(&self) -> u32 {
         let mut total = 0;
+        let mut game_number = 1;
 
         let colours: HashMap<&str, u32> = HashMap::from([
             ("red", 12),
@@ -18,13 +19,14 @@ impl Runner for Day02 {
         let lines = read_lines("./input/day02.txt");
         
         for line in lines {
-            let x = line.strip_prefix("Game ").unwrap();
-            let data: Vec<&str> = x.split(":").collect();
+            let data = line
+                .split(": ")
+                .skip(1)
+                .next()
+                .unwrap();
 
-            let match_num: u32 = data[0].parse().unwrap();
             let mut valid = true;
-
-            let draws: Vec<&str> = data[1].split(";").collect();
+            let draws: Vec<&str> = data.split(";").collect();
             
             'outer: for draw in draws {
                 let dice: Vec<&str> = draw.split(",").collect();
@@ -46,8 +48,9 @@ impl Runner for Day02 {
                 }
             }
             if valid {
-                total += match_num;
+                total += game_number;
             }
+            game_number += 1
         }
         return total;
     }

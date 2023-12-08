@@ -16,3 +16,16 @@ pub fn read_lines(filename: &str) -> Vec<String> {
         }
     }
 }
+
+pub fn read_raw(filename: &str) -> String {
+    let raw = read_to_string(filename);
+
+    match raw {
+        Ok(data) => {
+            return data
+        }
+        Err(err) => {
+            panic!("FILE READING ERROR\nFILE: {}\nERROR: {}", filename, err)
+        }
+    }
+}
