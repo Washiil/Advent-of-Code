@@ -70,6 +70,31 @@ impl Runner for Day06 {
     }
 
     fn part_two(&self) -> u32 {
-        0
+        let lines = read_lines("./input/day06.txt");
+
+        let mut distance: u64 = 0;
+        let mut time: u64 = 0;
+
+        for line in lines {
+            let parts: Vec<&str> = line.split(":").collect();
+            match parts[0] {
+                "Time" => {
+                    let y = parts[1].trim().replace(" ", "");
+                    time = y.parse().unwrap();
+                }
+                "Distance" => {
+                    let y = parts[1].trim().replace(" ", "");
+                    distance = y.parse().unwrap();
+                }
+                _ => panic!("Wrong input!")
+            }
+        }
+
+        let total = (0..time).filter_map(|speed| {
+            let temp_distance = (time - speed) * speed;
+            (temp_distance > distance).then_some(temp_distance)
+        }).count();
+
+        return total as u32;
     }
 }
