@@ -1,42 +1,140 @@
-mod runner;
-mod days;
-mod utility;
+use advent_of_code::template::commands::{all, download, read, scaffold, solve, time};
+use args::{parse, AppArguments};
 
-use std::io::{Read, stdin};
+#[cfg(feature = "today")]
+use advent_of_code::template::Day;
+#[cfg(feature = "today")]
+use std::process;
 
-use crate::runner::Runner;
+mod args {
+    use advent_of_code::template::Day;
+    use std::process;
 
-fn main() {
-    let days: Vec<Box<dyn Runner>> = vec![
-        Box::new(days::day01::Day01),
-        Box::new(days::day02::Day02),
-        Box::new(days::day03::Day03),
-        Box::new(days::day04::Day04),
-        Box::new(days::day05::Day05),
-        Box::new(days::day06::Day06),
-        Box::new(days::day07::Day07)
-    ];
-
-    let debug = true;
-
-    println!("┌────────┬────────────────┬────────────────┬────────────────┬────────────────┐");
-    println!("│ Day    │ Part 1         │ Duration 1     │ Part 2         │ Duration 2     │");
-    println!("├────────┼────────────────┼────────────────┼────────────────┼────────────────┤");
-
-    let current_day = &days[days.len() - 1].benchmark();
-    println!("│ Day {:0>2} │ {: <14} │ {: <14?} │ {: <14} │ {: <14?} │", days.len(), &current_day.0, &current_day.2, &current_day.1, &current_day.3);
-    println!("├────────┼────────────────┼────────────────┼────────────────┼────────────────┤");
-
-    if !debug {
-        for (i, day) in days.iter().enumerate() {
-            let benchmark = day.benchmark();
-            println!("│ Day {:0>2} │ {: <14} │ {: <14?} │ {: <14} │ {: <14?} │", i + 1, &benchmark.0, &benchmark.2, &benchmark.1, &benchmark.3);
-        }
+    pub enum AppArguments {
+        Download {
+            day: Day,
+        },
+        Read {
+            day: Day,
+        },
+        Scaffold {
+            day: Day,
+            download: bool,
+        },
+        Solve {
+            day: Day,
+            release: bool,
+            time: bool,
+            dhat: bool,
+            submit: Option<u8>,
+        },
+        All {
+            release: bool,
+            time: bool,
+        },
+        Time {
+            all: bool,
+            day: Option<Day>,
+        },
+        #[cfg(feature = "today")]
+        Today,
     }
 
-    println!("└────────┴────────────────┴────────────────┴────────────────┴────────────────┘");
+    pub fn parse() -> Result<AppArguments, Box<dyn std::error::Error>> {
+        let mut args = pico_args::Arguments::from_env();
 
-    println!("Press Enter to exit...");
-    // let mut input = String::new();
-    // stdin().read_line(&mut input).expect("Failed to read line");
+        let app_args = match args.subcommand()?.as_deref() {
+            Some("all") => AppArguments::All {
+                release: args.contains("--release"),
+                time: args.contains("--time"),
+            },
+            Some("time") => {
+                let all = args.contains("--all");
+
+                AppArguments::Time {
+                    all,
+                    day: args.opt_free_from_str()?,
+                }
+            }
+            Some("download") => AppArguments::Download {
+                day: args.free_from_str()?,
+            },
+            Some("read") => AppArguments::Read {
+                day: args.free_from_str()?,
+            },
+            Some("scaffold") => AppArguments::Scaffold {
+                day: args.free_from_str()?,
+                download: args.contains("--download"),
+            },
+            Some("solve") => AppArguments::Solve {
+                day: args.free_from_str()?,
+                release: args.contains("--release"),
+                submit: args.opt_value_from_str("--submit")?,
+                time: args.contains("--time"),
+                dhat: args.contains("--dhat"),
+            },
+            #[cfg(feature = "today")]
+            Some("today") => AppArguments::Today,
+            Some(x) => {
+                eprintln!("Unknown command: {x}");
+                process::exit(1);
+            }
+            None => {
+                eprintln!("No command specified.");
+                process::exit(1);
+            }
+        };
+
+        let remaining = args.finish();
+        if !remaining.is_empty() {
+            eprintln!("Warning: unknown argument(s): {remaining:?}.");
+        }
+
+        Ok(app_args)
+    }
+}
+
+fn main() {
+    match parse() {
+        Err(err) => {
+            eprintln!("Error: {err}");
+            std::process::exit(1);
+        }
+        Ok(args) => match args {
+            AppArguments::All { release, time } => all::handle(release, time),
+            AppArguments::Time { day, all } => time::handle(day, all),
+            AppArguments::Download { day } => download::handle(day),
+            AppArguments::Read { day } => read::handle(day),
+            AppArguments::Scaffold { day, download } => {
+                scaffold::handle(day);
+                if download {
+                    download::handle(day);
+                }
+            }
+            AppArguments::Solve {
+                day,
+                release,
+                time,
+                dhat,
+                submit,
+            } => solve::handle(day, release, time, dhat, submit),
+            #[cfg(feature = "today")]
+            AppArguments::Today => {
+                match Day::today() {
+                    Some(day) => {
+                        scaffold::handle(day);
+                        download::handle(day);
+                        read::handle(day)
+                    }
+                    None => {
+                        eprintln!(
+                            "`today` command can only be run between the 1st and \
+                            the 25th of december. Please use `scaffold` with a specific day."
+                        );
+                        process::exit(1)
+                    }
+                };
+            }
+        },
+    };
 }
