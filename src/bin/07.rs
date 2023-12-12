@@ -16,15 +16,15 @@ enum HandType {
 
 impl HandType {
     pub fn from_hand(hand: &Vec<u32>, wilds: bool) -> HandType {
-        if wilds {
-            let number_of_wilds = hand.clone().iter().filter(|&n| *n == 11).count();
-            let mut cp = hand.clone();
+        let mut pairs = vec![0; 5];
+        let mut cp = hand.clone();
 
-            cp.retain(|&n| n != 11);
+        if wilds {
+            let number_of_wilds = hand.clone().iter().filter(|&n| *n == 1).count();
+
+            cp.retain(|&n| n != 1);
 
             let unique: HashSet<u32> = HashSet::from_iter(cp.clone().into_iter());
-
-            let mut pairs = vec![0; 5];
 
             for u in &unique {
                 let x = cp.len();
@@ -39,33 +39,9 @@ impl HandType {
                 pairs[index + number_of_wilds] += 1;
             }
             // Shift right most non zero value to the right (wilds) amount of indecies.
-
-            if pairs[4] == 1 {
-                return HandType::FiveOfAKind
-            }
-            else if pairs[3] == 1 {
-                return HandType::FourOfAKind
-            }
-            else if pairs[2] == 1 {
-                if pairs[1] == 1 {
-                    return HandType::FullHouse
-                }
-                return HandType::ThreeOfAKind
-            }
-            else if pairs[1] == 2 {
-                return HandType::TwoPair
-            }
-            else if pairs[1] == 1 {
-                return HandType::OnePair
-            }
-            return HandType::HighCard;
         }
         else {
-            let mut cp = hand.clone();
-            let unique: HashSet<u32> = HashSet::from_iter(hand.clone().into_iter());
-
-            let mut pairs = vec![0; 5];
-
+            let unique: HashSet<u32> = HashSet::from_iter(cp.clone().into_iter());
             for u in &unique {
                 let x = cp.len();
                 cp.retain(|c| c != u);
@@ -73,27 +49,26 @@ impl HandType {
 
                 pairs[x - y - 1] += 1;
             }
-
-            if pairs[4] == 1 {
-                return HandType::FiveOfAKind
-            }
-            else if pairs[3] == 1 {
-                return HandType::FourOfAKind
-            }
-            else if pairs[2] == 1 {
-                if pairs[1] == 1 {
-                    return HandType::FullHouse
-                }
-                return HandType::ThreeOfAKind
-            }
-            else if pairs[1] == 2 {
-                return HandType::TwoPair
-            }
-            else if pairs[1] == 1 {
-                return HandType::OnePair
-            }
-            return HandType::HighCard;
         }
+        if pairs[4] == 1 {
+            return HandType::FiveOfAKind
+        }
+        else if pairs[3] == 1 {
+            return HandType::FourOfAKind
+        }
+        else if pairs[2] == 1 {
+            if pairs[1] == 1 {
+                return HandType::FullHouse
+            }
+            return HandType::ThreeOfAKind
+        }
+        else if pairs[1] == 2 {
+            return HandType::TwoPair
+        }
+        else if pairs[1] == 1 {
+            return HandType::OnePair
+        }
+        return HandType::HighCard;
     }
 }
 
@@ -107,6 +82,7 @@ struct Hand {
 
 impl Ord for Hand {
     fn cmp(&self, other: &Self) -> Ordering {
+        // println!("A: {:?}\nB: {:?}", self.cards, other.cards);
         // First, compare by hand type
         let hand_type_ordering = self.hand_type.cmp(&other.hand_type);
 
@@ -208,7 +184,7 @@ pub fn part_two(input: &str) -> Option<u32> {
                     'A' => 14,
                     'K' => 13,
                     'Q' => 12,
-                    'J' => 11,
+                    'J' => 1,
                     'T' => 10,
                     '9' => 9,
                     '8' => 8,
@@ -229,8 +205,6 @@ pub fn part_two(input: &str) -> Option<u32> {
         let bid = parts[1].parse().unwrap();
 
         let hand_type = HandType::from_hand(&cards, true);
-        println!("CARDS: {:?}", cards);
-        println!("HAND_TYPE: {:?}", hand_type);
 
         hands.push(Hand{
             cards,
@@ -261,7 +235,7 @@ mod tests {
 
     #[test]
     fn temp_test() {
-        let result = HandType::from_hand(&vec![11, 8, 13, 4, 10], true);
+        let result = HandType::from_hand(&vec![1, 8, 13, 4, 10], true);
         assert_eq!(result, HandType::OnePair)
     }
 
