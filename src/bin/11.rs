@@ -1,204 +1,106 @@
 advent_of_code::solution!(11);
 
-#[derive(Clone)]
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 struct Point {
-    row: u32,
-    col: u32
+    pub x: usize,
+    pub y: usize,
 }
 
 impl Point {
-    fn new(row: u32, col: u32) -> Point {
-        Point { row, col }
-    }
-
-    fn manhattan_distance(&self, other: &Point) -> u32 {
-        self.row.abs_diff(other.row) + self.col.abs_diff(other.col)
+    pub fn new(x: usize, y: usize) -> Self {
+        Point { x, y }
     }
 }
 
-fn further_distance(map: &Vec<Vec<char>>, start: &Point, end: &Point) -> usize {
-    let y_total = 
-        map[0][start.y.min(end.y)..=start.y.max(end.y)]
-            .iter()
-            .fold(0, |total, val| {
-                total + match val {
-                    '*' => 100,
-                    _ => 1
+fn find_galaxies(universe: &Vec<Vec<char>>) -> Vec<Point> {
+    let mut galaxies: Vec<Point> = Vec::new();
+
+    for row in 0..universe.len() {
+        for col in 0..universe[0].len() {
+            match universe[row][col] {
+                '#' => {
+                    galaxies.push(Point::new(col, row))
                 }
-            });
-        
-    let x_total =
-        map[start.x.min(end.x)..=start.x.max(end.x)]
-            .iter()
-            .fold(0, |total, val| {
-                total + match val[0] {
-                    '*' => 100,
-                    _ => 1
-                }
-            });
-        
-    x_total + y_total
+                '.' => {}
+                _ => unreachable!()
+            }
+        }
+    }
+    galaxies
 }
 
-pub fn part_one(input: &str) -> Option<u32> {
-    let mut lines: Vec<Vec<char>> = 
+fn x_expansion(galaxies: &mut Vec<Point>, scalar: usize) {
+    let mut sum_expansion = 0;
+    let mut last_x = 0;
+    for galaxy in galaxies.iter_mut() {
+        if galaxy.x != last_x {
+            sum_expansion += (galaxy.x - last_x - 1) * (scalar - 1);
+            last_x = galaxy.x;
+        }
+
+        galaxy.x += sum_expansion;
+    }
+}
+
+fn y_expansion(galaxies: &mut Vec<Point>, scalar: usize) {
+    let mut sum_expansion = 0;
+    let mut last_y = 0;
+    for galaxy in galaxies.iter_mut() {
+        if galaxy.y != last_y {
+            sum_expansion += (galaxy.y - last_y - 1) * (scalar - 1);
+            last_y = galaxy.y;
+        }
+        galaxy.y += sum_expansion;
+    }
+}
+
+fn parse(input: &str, expansion: usize) -> Vec<Point> {
+    let universe: Vec<Vec<char>> = 
         input
             .lines()
             .map(|line| line.chars().collect())
             .collect();
-    
-    let rows = lines.len();
-    let cols = lines[0].len();
 
-    // TODO: Expand Rows
-    let mut expansion_rows: Vec<usize> = Vec::new();
-    for row in 0..rows {
-        if lines[row].iter().all(|x| *x == '.') {
-            expansion_rows.push(row);
-        }
-    }
-    // Keep a watch on that index
+    let mut galaxies = find_galaxies(&universe);
 
-    let mut index = 0 ;
-    for i in expansion_rows {
-        lines.insert(i + index, vec!['.'; cols]);
-        index += 1;
-    }
+    y_expansion(&mut galaxies, expansion);
 
-    let rows = lines.len();
-    let cols = lines[0].len();
+    galaxies.sort_by_key(|galaxy| galaxy.x);
 
-    // TODO: Expand Coloumns we need to update the index as we add rows
-    let mut expansion_cols: Vec<usize> = Vec::new();
-    'outer: for col in 0..cols {
-        for row in 0..rows {
-            if lines[row][col] != '.' {
-                continue 'outer;
-            }
-        }
-        expansion_cols.push(col);
-    }
+    x_expansion(&mut galaxies, expansion);
 
-    index = 0;
-    for i in expansion_cols {
-        for row in 0..rows {
-            lines[row].insert(i + index, '.');
-        }
-        index += 1;
-    }
-
-    let rows = lines.len();
-    let cols = lines[0].len();
-
-    // Get coordinates for every galaxy
-    let mut galaxies: Vec<Point> = Vec::new();
-    for r in 0..rows {
-        for c in 0..cols {
-            if lines[r][c] == '#' {
-                galaxies.push(Point {
-                    x: c,
-                    y: r
-                });
-            }
-        }
-    }
-
-    let total_galaxies = galaxies.len();
-    let mut total_distance = 0;
-
-    for i in 0..total_galaxies {
-        for j in i + 1..total_galaxies {
-            total_distance += distance(&galaxies[i], &galaxies[j]);
-        }
-    }
-
-    // TODO: Calculate shortest Path between all galaxy combinations
-    Some(total_distance as u32)
+    galaxies
 }
 
-pub fn part_two(input: &str) -> Option<u32> {
-    let mut lines: Vec<Vec<char>> = 
-        input
-            .lines()
-            .map(|line| line.chars().collect())
-            .collect();
-    
-    let rows = lines.len();
-    let cols = lines[0].len();
+pub fn part_one(input: &str) -> Option<u64> {
+    let galaxies = parse(input, 2);
 
-    // TODO: Expand Rows
-    let mut expansion_rows: Vec<usize> = Vec::new();
-    for row in 0..rows {
-        if lines[row].iter().all(|x| *x == '.') {
-            expansion_rows.push(row);
-        }
-    }
-    // Keep a watch on that index
+    let mut sum: usize = 0;
 
-    let mut index = 0 ;
-    for i in expansion_rows {
-        lines.insert(i + index, vec!['*'; cols]);
-        index += 1;
-    }
-
-    let rows = lines.len();
-    let cols = lines[0].len();
-
-    // TODO: Expand Coloumns we need to update the index as we add rows
-    let mut expansion_cols: Vec<usize> = Vec::new();
-    'outer: for col in 0..cols {
-        for row in 0..rows {
-            if lines[row][col] == '#' {
-                continue 'outer;
-            }
-        }
-        expansion_cols.push(col);
-    }
-
-    index = 0;
-    for i in expansion_cols {
-        for row in 0..rows {
-            lines[row].insert(i + index, '*');
-        }
-        index += 1;
-    }
-
-    for l in &lines {
-        for c in l {
-            print!("{}", c);
-        }
-        println!();
-    }
-
-    let rows = lines.len();
-    let cols = lines[0].len();
-
-    // Get coordinates for every galaxy
-    let mut galaxies: Vec<Point> = Vec::new();
-    for r in 0..rows {
-        for c in 0..cols {
-            if lines[r][c] == '#' {
-                galaxies.push(Point {
-                    x: c,
-                    y: r
-                });
-            }
+    for i in 0..galaxies.len() {
+        let a = &galaxies[i];
+        for b in &galaxies[i + 1..] {
+            sum += a.x.abs_diff(b.x) + a.y.abs_diff(b.y);
         }
     }
 
-    let total_galaxies = galaxies.len();
-    let mut total_distance = 0;
+    Some(sum as u64)
+}
 
+pub fn part_two(input: &str) -> Option<u64> {
+    let galaxies = parse(input, 1_000_000);
 
-    // Loop over every galaxy
-    for i in 0..total_galaxies {
-        for j in i + 1..total_galaxies {
-            total_distance += further_distance(&lines, &galaxies[i], &galaxies[j]);
+    let mut sum: usize = 0;
+
+    for i in 0..galaxies.len() {
+        let a = &galaxies[i];
+        for b in &galaxies[i + 1..] {
+            sum += a.x.abs_diff(b.x) + a.y.abs_diff(b.y);
         }
     }
 
-    // TODO: Calculate shortest Path between all galaxy combinations
-    Some(total_distance as u32)
+    Some(sum as u64)
 }
 
 #[cfg(test)]
@@ -209,26 +111,6 @@ mod tests {
     fn test_part_one() {
         let result = part_one(&advent_of_code::template::read_file("examples", DAY));
         assert_eq!(result, Some(374));
-    }
-
-    #[test]
-    fn far_distance() {
-        let input: Vec<Vec<char>> = 
-"....1........
-.........2...
-3............".lines().map(|line| line.chars().collect()).collect();
-        let p1 = Point {
-            x: 4,
-            y: 0
-        };
-
-        let p2 = Point {
-            x: 9,
-            y: 1
-        };
-
-        let result = further_distance(&input, &p1, &p2);
-        assert_eq!(result, 105);
     }
 
     #[test]
