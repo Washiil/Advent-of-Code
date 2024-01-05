@@ -26,6 +26,7 @@ pub fn part_two(input: &str) -> Option<u32> {
         let mut output = String::from("");
         let mut left = 0;
 
+        // Come back and refactor this later for readability
         while left < line.len() {
             let part = &line[left..];
             if part.starts_with("one") {
