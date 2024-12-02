@@ -1,6 +1,6 @@
 advent_of_code::solution!(1);
 
-use std::{collections::HashMap, hash::Hash};
+use std::collections::HashMap;
 
 pub fn part_one(input: &str) -> Option<u32> {
     let lines = input.lines();
