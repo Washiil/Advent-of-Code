@@ -1,15 +1,18 @@
-use std::str::SplitWhitespace;
-
 advent_of_code::solution!(2);
 
 pub fn part_one(input: &str) -> Option<u32> {
     let mut output = 0;
     for line in input.lines() {
-        let nums: Vec<u32> = line.split_whitespace().map(|c| c.parse::<u32>().unwrap()).collect();
+        let nums: Vec<u32> = line
+            .split_whitespace()
+            .map(|c| c.parse::<u32>().unwrap())
+            .collect();
 
         let ascending = nums.windows(2).all(|w| w[1] >= w[0] && w[1] - w[0] <= 3);
         let descending = nums.windows(2).all(|w| w[1] <= w[0] && w[0] - w[1] <= 3);
-        let differ = nums.windows(2).all(|w| w[0].abs_diff(w[1]) > 0 && w[0].abs_diff(w[1]) < 4);
+        let differ = nums
+            .windows(2)
+            .all(|w| w[0].abs_diff(w[1]) > 0 && w[0].abs_diff(w[1]) < 4);
 
         if (ascending || descending) && differ {
             output += 1;
@@ -22,18 +25,29 @@ pub fn part_two(input: &str) -> Option<u32> {
     let mut output = 0;
 
     for line in input.lines() {
-        let nums: Vec<u32> = line.split_whitespace().map(|c| c.parse::<u32>().unwrap()).collect();
+        let nums: Vec<u32> = line
+            .split_whitespace()
+            .map(|c| c.parse::<u32>().unwrap())
+            .collect();
         let mut safe = false;
 
         for i in 0..nums.len() {
-            let filtered: Vec<&u32> = nums.iter().enumerate()
+            let filtered: Vec<&u32> = nums
+                .iter()
+                .enumerate()
                 .filter(|&(j, v)| i != j)
                 .map(|(_, v)| v)
                 .collect();
 
-            let ascending = filtered.windows(2).all(|w| w[1] >= w[0] && w[1] - w[0] <= 3);
-            let descending = filtered.windows(2).all(|w| w[1] <= w[0] && w[0] - w[1] <= 3);
-            let differ = filtered.windows(2).all(|w| w[0].abs_diff(*w[1]) > 0 && w[0].abs_diff(*w[1]) < 4);
+            let ascending = filtered
+                .windows(2)
+                .all(|w| w[1] >= w[0] && w[1] - w[0] <= 3);
+            let descending = filtered
+                .windows(2)
+                .all(|w| w[1] <= w[0] && w[0] - w[1] <= 3);
+            let differ = filtered
+                .windows(2)
+                .all(|w| w[0].abs_diff(*w[1]) > 0 && w[0].abs_diff(*w[1]) < 4);
             if (ascending || descending) && differ {
                 output += 1;
                 break;
