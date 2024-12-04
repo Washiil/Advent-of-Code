@@ -29,13 +29,12 @@ pub fn part_two(input: &str) -> Option<u32> {
             .split_whitespace()
             .map(|c| c.parse::<u32>().unwrap())
             .collect();
-        let mut safe = false;
 
         for i in 0..nums.len() {
             let filtered: Vec<&u32> = nums
                 .iter()
                 .enumerate()
-                .filter(|&(j, v)| i != j)
+                .filter(|&(j, _)| i != j)
                 .map(|(_, v)| v)
                 .collect();
 
