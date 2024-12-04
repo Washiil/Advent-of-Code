@@ -1,49 +1,39 @@
 advent_of_code::solution!(4);
 
-pub fn check_for_xmas(board: &Vec<Vec<char>>, x: usize, y: usize, direction: (i32, i32)) -> bool {
-    let mut index = 0;
-    let xmas: [char; 3] = ['M', 'A', 'S'];
+pub fn check_for_xmas(
+    board: &Vec<Vec<char>>,
+    row: usize,
+    col: usize,
+    direction: (i32, i32),
+) -> bool {
+    let mas: [char; 3] = ['M', 'A', 'S'];
+    let (dx, dy) = direction;
 
-    let mut coordinates: (i32, i32) = (x as i32, y as i32);
+    for (i, target) in mas.iter().enumerate() {
+        let new_row = (row as i32 + dx * (i as i32 + 1)) as usize;
+        let new_col = (col as i32 + dy * (i as i32 + 1)) as usize;
 
-    while index < xmas.len() {
-        coordinates.0 = coordinates.0.checked_add(direction.0).unwrap();
-        coordinates.1 = coordinates.1.checked_add(direction.1).unwrap();
-
-        if let Some(row) = board.get(coordinates.0 as usize) {
-            if let Some(c) = row.get(coordinates.1 as usize) {
-                if *c != xmas[index] {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        } else {
-            return false;
+        match board.get(new_row).and_then(|r| r.get(new_col)) {
+            Some(&c) if c == *target => continue,
+            _ => return false,
         }
-
-        index += 1;
     }
-
     true
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
     let mut output = 0;
 
-    // Horizontal Search
-    let mut board: Vec<Vec<char>> = vec![];
+    let board = input
+        .lines()
+        .map(|line| line.chars().collect::<Vec<char>>())
+        .collect::<Vec<Vec<char>>>();
 
-    for line in input.lines() {
-        board.push(line.chars().collect::<Vec<char>>())
-    }
-
-    let directions: [(i32, i32); 9] = [
+    let directions: [(i32, i32); 8] = [
         (-1, 1),
         (0, 1),
         (1, 1),
         (-1, 0),
-        (0, 0),
         (1, 0),
         (-1, -1),
         (0, -1),
@@ -77,7 +67,7 @@ pub fn part_two(input: &str) -> Option<u64> {
         board.push(line.chars().collect::<Vec<char>>())
     }
 
-    let directions: [(i32, i32); 5] = [(0, 0), (-1, 1), (1, -1), (-1, -1), (1, 1),];
+    let directions: [(i32, i32); 5] = [(0, 0), (-1, 1), (1, -1), (-1, -1), (1, 1)];
 
     for row in 1..board.len() - 1 {
         for col in 1..board[row].len() - 1 {
