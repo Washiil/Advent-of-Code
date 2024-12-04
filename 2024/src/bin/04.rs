@@ -13,15 +13,13 @@ pub fn check_for_xmas(board: &Vec<Vec<char>>, x: usize, y: usize, direction: (i3
         if let Some(row) = board.get(coordinates.0 as usize) {
             if let Some(c) = row.get(coordinates.1 as usize) {
                 if *c != xmas[index] {
-                    return false
+                    return false;
                 }
+            } else {
+                return false;
             }
-            else {
-                return false
-            }
-        }
-        else {
-            return false
+        } else {
+            return false;
         }
 
         index += 1;
@@ -41,9 +39,15 @@ pub fn part_one(input: &str) -> Option<u32> {
     }
 
     let directions: [(i32, i32); 9] = [
-        (-1, 1), (0, 1), (1, 1),
-        (-1, 0), (0, 0), (1, 0),
-        (-1, -1), (0, -1), (1, -1)
+        (-1, 1),
+        (0, 1),
+        (1, 1),
+        (-1, 0),
+        (0, 0),
+        (1, 0),
+        (-1, -1),
+        (0, -1),
+        (1, -1),
     ];
 
     for row in 0..board.len() {
@@ -63,8 +67,36 @@ pub fn part_one(input: &str) -> Option<u32> {
     Some(output)
 }
 
-pub fn part_two(input: &str) -> Option<u32> {
-    None
+pub fn part_two(input: &str) -> Option<u64> {
+    let mut output: u64 = 0;
+
+    // Horizontal Search
+    let mut board: Vec<Vec<char>> = vec![];
+
+    for line in input.lines() {
+        board.push(line.chars().collect::<Vec<char>>())
+    }
+
+    let directions: [(i32, i32); 5] = [(0, 0), (-1, 1), (1, -1), (-1, -1), (1, 1),];
+
+    for row in 1..board.len() - 1 {
+        for col in 1..board[row].len() - 1 {
+            let mut s = String::new();
+
+            for dir in directions {
+                let x = row as i32 + dir.0;
+                let y = col as i32 + dir.1;
+
+                s.push(board[x as usize][y as usize]);
+            }
+
+            if s == "AMSMS" || s == "AMSSM" || s == "ASMMS" || s == "ASMSM" {
+                output += 1;
+            }
+        }
+    }
+
+    Some(output)
 }
 
 #[cfg(test)]
@@ -80,6 +112,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, Some(0));
+        assert_eq!(result, Some(9));
     }
 }
