@@ -6,10 +6,10 @@ pub fn check_for_xmas(
     col: usize,
     direction: (i32, i32),
 ) -> bool {
-    let mas: [char; 3] = ['M', 'A', 'S'];
+    const MAS: [char; 3] = ['M', 'A', 'S'];
     let (dx, dy) = direction;
 
-    for (i, target) in mas.iter().enumerate() {
+    for (i, target) in MAS.iter().enumerate() {
         let new_row = (row as i32 + dx * (i as i32 + 1)) as usize;
         let new_col = (col as i32 + dy * (i as i32 + 1)) as usize;
 
@@ -29,7 +29,7 @@ pub fn part_one(input: &str) -> Option<u32> {
         .map(|line| line.chars().collect::<Vec<char>>())
         .collect::<Vec<Vec<char>>>();
 
-    let directions: [(i32, i32); 8] = [
+    const DIRECTIONS: [(i32, i32); 8] = [
         (-1, 1),
         (0, 1),
         (1, 1),
@@ -45,7 +45,7 @@ pub fn part_one(input: &str) -> Option<u32> {
             let c = board[row][col];
 
             if c == 'X' {
-                for dir in directions {
+                for dir in DIRECTIONS {
                     if check_for_xmas(&board, row, col, dir) {
                         output += 1;
                     }
@@ -60,27 +60,26 @@ pub fn part_one(input: &str) -> Option<u32> {
 pub fn part_two(input: &str) -> Option<u64> {
     let mut output: u64 = 0;
 
-    // Horizontal Search
-    let mut board: Vec<Vec<char>> = vec![];
+    let board = input
+        .lines()
+        .map(|line| line.chars().collect::<Vec<char>>())
+        .collect::<Vec<Vec<char>>>();
 
-    for line in input.lines() {
-        board.push(line.chars().collect::<Vec<char>>())
-    }
-
-    let directions: [(i32, i32); 5] = [(0, 0), (-1, 1), (1, -1), (-1, -1), (1, 1)];
+    const DIRECTIONS: [(i32, i32); 5] = [(0, 0), (-1, 1), (1, -1), (-1, -1), (1, 1)];
+    const PATTERNS: [&str; 4] = ["AMSMS", "AMSSM", "ASMMS", "ASMSM"];
 
     for row in 1..board.len() - 1 {
         for col in 1..board[row].len() - 1 {
             let mut s = String::new();
 
-            for dir in directions {
+            for dir in DIRECTIONS {
                 let x = row as i32 + dir.0;
                 let y = col as i32 + dir.1;
 
                 s.push(board[x as usize][y as usize]);
             }
 
-            if s == "AMSMS" || s == "AMSSM" || s == "ASMMS" || s == "ASMSM" {
+            if PATTERNS.contains(&s.as_str()) {
                 output += 1;
             }
         }
