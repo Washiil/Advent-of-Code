@@ -9,19 +9,14 @@ pub fn part_one(input: &str) -> Option<u32> {
 
     for pair in lines {
         let nums: Vec<&str> = pair.split("   ").collect();
-        if nums.len() != 2 {
-            println!("Error parsing input");
-            return None;
-        }
 
         if let Ok(num1) = nums[0].parse::<i32>() {
-            list1.push(num1);
-        } else {
-            panic!("Error parsing")
-        }
-
-        if let Ok(num2) = nums[1].parse::<i32>() {
-            list2.push(num2);
+            if let Ok(num2) = nums[1].parse::<i32>() {
+                list1.push(num1);
+                list2.push(num2);
+            } else {
+                panic!("Error parsing")
+            }
         } else {
             panic!("Error parsing")
         }
@@ -29,10 +24,6 @@ pub fn part_one(input: &str) -> Option<u32> {
 
     list1.sort();
     list2.sort();
-
-    if list1.len() != list2.len() {
-        println!("Lengths of inputs do not match!");
-    }
 
     let mut output: i32 = 0;
     for i in 0..list1.len() {
@@ -52,19 +43,14 @@ pub fn part_two(input: &str) -> Option<u32> {
 
     for pair in lines {
         let nums: Vec<&str> = pair.split("   ").collect();
-        if nums.len() != 2 {
-            println!("Error parsing input");
-            return None;
-        }
 
         if let Ok(num1) = nums[0].parse::<u32>() {
-            list1.push(num1);
-        } else {
-            panic!("Error parsing")
-        }
-
-        if let Ok(num2) = nums[1].parse::<u32>() {
-            list2.push(num2);
+            if let Ok(num2) = nums[1].parse::<u32>() {
+                list1.push(num1);
+                list2.push(num2);
+            } else {
+                panic!("Error parsing")
+            }
         } else {
             panic!("Error parsing")
         }
