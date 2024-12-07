@@ -65,6 +65,11 @@ pub fn part_one(input: &str) -> Option<u64> {
             let mut temp = nums.clone(); // Avoid borrowing `nums`
             for op in perm {
                 let n1 = temp.pop_front().unwrap();
+
+                if n1 > target {
+                    return false;
+                }
+
                 let n2 = temp.pop_front().unwrap();
 
                 let new_val = match op {
@@ -85,8 +90,52 @@ pub fn part_one(input: &str) -> Option<u64> {
     Some(output)
 }
 
-pub fn part_two(input: &str) -> Option<u32> {
-    None
+pub fn part_two(input: &str) -> Option<u64> {
+    let operators = [Operator::Add, Operator::Multiply, Operator::Concatination];
+
+    let output: u64 = input.lines().filter_map(|line| {
+        let split: Vec<&str> = line.split(": ").collect();
+
+        let target: u64 = split[0].parse::<u64>().expect("Invalid calibration target");
+
+        let nums: VecDeque<u64> = split[1]
+            .split(' ')
+            .filter_map(|n| n.parse::<u64>().ok())
+            .collect();
+
+        let num_of_operations = nums.len() - 1;
+
+        let permutations = generate_permutations(&operators, num_of_operations);
+
+        if permutations.iter().any(|perm| {
+            let mut temp = nums.clone(); // Avoid borrowing `nums`
+            for op in perm {
+                let n1 = temp.pop_front().unwrap();
+
+                if n1 > target {
+                    return false;
+                }
+
+                let n2 = temp.pop_front().unwrap();
+
+                let new_val = match op {
+                    Operator::Multiply => n1 * n2,
+                    Operator::Add => n1 + n2,
+                    Operator::Concatination => {
+                        format!("{}{}", n1.to_string(), n2.to_string()).parse::<u64>().unwrap()
+                    }
+                };
+                temp.push_front(new_val);
+            }
+
+            temp[0] == target
+        }) {
+            return Some(target);
+        }
+        None
+    }).sum();
+
+    Some(output)
 }
 
 #[cfg(test)]
@@ -102,6 +151,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
+        assert_eq!(result, Some(11387));
     }
 }
