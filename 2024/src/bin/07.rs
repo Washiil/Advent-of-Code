@@ -1,23 +1,31 @@
-use std::{char::TryFromCharError, convert};
-use std::collections::VecDeque;
-
 advent_of_code::solution!(7);
 
 #[derive(Debug, Clone, Copy)]
 enum Operator {
     Multiply,
     Add,
-    Concatination,
+    Concatenate,
 }
 
-impl Operator {
-    pub fn from_char(c: char) -> Option<Operator> {
-        match c {
-            '+' => Some(Operator::Add),
-            '*' => Some(Operator::Multiply),
-            _ => None
+fn evaluate_expression(nums: &[u64], perm: &[Operator], target: u64) -> bool {
+    let mut temp = nums.to_vec();
+    for &op in perm {
+        let n1 = temp.pop().unwrap();
+        if n1 > target {
+            return false;
         }
+
+        let n2 = temp.pop().unwrap();
+        let new_val = match op {
+            Operator::Multiply => n1 * n2,
+            Operator::Add => n1 + n2,
+            Operator::Concatenate => {
+                format!("{}{}", n1, n2).parse::<u64>().unwrap()
+            }
+        };
+        temp.push(new_val);
     }
+    temp[0] == target
 }
 
 fn generate_permutations(operators: &[Operator], length: usize) -> Vec<Vec<Operator>> {
@@ -45,13 +53,11 @@ fn generate_permutations(operators: &[Operator], length: usize) -> Vec<Vec<Opera
 }
 
 pub fn part_one(input: &str) -> Option<u64> {
-    let operators = [Operator::Add, Operator::Multiply];
+    const OPERATORS: [Operator; 2] = [Operator::Multiply, Operator::Add];
 
     let output: u64 = input.lines().filter_map(|line| {
         let split: Vec<&str> = line.split(": ").collect();
-
-        let target: u64 = split[0].parse::<u64>().expect("Invalid calibration target");
-
+        let target: u64 = split[0].parse().ok()?;
         let nums: Vec<u64> = split[1]
             .split(' ')
             .filter_map(|n| n.parse::<u64>().ok())
@@ -60,28 +66,10 @@ pub fn part_one(input: &str) -> Option<u64> {
 
         let num_of_operations = nums.len() - 1;
 
-        let permutations = generate_permutations(&operators, num_of_operations);
+        let permutations = generate_permutations(&OPERATORS, num_of_operations);
 
         if permutations.iter().any(|perm| {
-            let mut temp = nums.clone(); // Avoid borrowing `nums`
-            for op in perm {
-                let n1 = temp.pop().unwrap();
-
-                if n1 > target {
-                    return false;
-                }
-
-                let n2 = temp.pop().unwrap();
-
-                let new_val = match op {
-                    Operator::Multiply => n1 * n2,
-                    Operator::Add => n1 + n2,
-                    _ => panic!("Invalid operators for part one!")
-                };
-                temp.push(new_val);
-            }
-
-            temp[0] == target
+            evaluate_expression(&nums, perm, target)
         }) {
             return Some(target);
         }
@@ -92,13 +80,11 @@ pub fn part_one(input: &str) -> Option<u64> {
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
-    let operators = [Operator::Add, Operator::Multiply, Operator::Concatination];
+    const OPERATORS: [Operator; 3] = [Operator::Add, Operator::Multiply, Operator::Concatenate];
 
     let output: u64 = input.lines().filter_map(|line| {
         let split: Vec<&str> = line.split(": ").collect();
-
-        let target: u64 = split[0].parse::<u64>().expect("Invalid calibration target");
-
+        let target: u64 = split[0].parse().ok()?;
         let nums: Vec<u64> = split[1]
             .split(' ')
             .filter_map(|n| n.parse::<u64>().ok())
@@ -107,30 +93,10 @@ pub fn part_two(input: &str) -> Option<u64> {
 
         let num_of_operations = nums.len() - 1;
 
-        let permutations = generate_permutations(&operators, num_of_operations);
+        let permutations = generate_permutations(&OPERATORS, num_of_operations);
 
         if permutations.iter().any(|perm| {
-            let mut temp = nums.clone(); // Avoid borrowing `nums`
-            for op in perm {
-                let n1 = temp.pop().unwrap();
-
-                if n1 > target {
-                    return false;
-                }
-
-                let n2 = temp.pop().unwrap();
-
-                let new_val = match op {
-                    Operator::Multiply => n1 * n2,
-                    Operator::Add => n1 + n2,
-                    Operator::Concatination => {
-                        format!("{}{}", n1.to_string(), n2.to_string()).parse::<u64>().unwrap()
-                    }
-                };
-                temp.push(new_val);
-            }
-
-            temp[0] == target
+            evaluate_expression(&nums, perm, target)
         }) {
             return Some(target);
         }
