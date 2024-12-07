@@ -7,7 +7,7 @@ enum Direction {
     Up,
     Down,
     Left,
-    Right
+    Right,
 }
 
 impl Direction {
@@ -27,7 +27,7 @@ impl Direction {
             Direction::Left => Direction::Up,
             Direction::Right => Direction::Down,
         };
-    }    
+    }
 }
 
 impl std::fmt::Display for Direction {
@@ -61,15 +61,17 @@ pub fn part_one(input: &str) -> Option<u32> {
 
     visited.insert(position);
 
-    while let Some(&character) = map.get(position.1 as usize).and_then(|row| row.get(position.0 as usize)) {
+    while let Some(&character) = map
+        .get(position.1 as usize)
+        .and_then(|row| row.get(position.0 as usize))
+    {
         let cardinal = direction.to_cardinal();
 
         if character == '#' {
             position.0 -= cardinal.0;
             position.1 -= cardinal.1;
             direction.turn_right();
-        }
-        else {
+        } else {
             visited.insert(position);
 
             position.0 += cardinal.0;
@@ -110,22 +112,23 @@ pub fn part_two(input: &str) -> Option<u32> {
             let mut direction = starting_direction.clone();
             let mut position = starting_position;
 
-            while let Some(&character) = map.get(position.1 as usize).and_then(|row| row.get(position.0 as usize)) {
+            while let Some(&character) = map
+                .get(position.1 as usize)
+                .and_then(|row| row.get(position.0 as usize))
+            {
                 let cardinal = direction.to_cardinal();
 
                 if character == '#' {
                     position.0 -= cardinal.0;
                     position.1 -= cardinal.1;
                     direction.turn_right();
-                }
-                else {
+                } else {
                     if visited.contains(&(position, cardinal)) {
                         output += 1;
                         break;
-                    }
-                    else {
+                    } else {
                         visited.insert((position, cardinal));
-            
+
                         position.0 += cardinal.0;
                         position.1 += cardinal.1;
                     }
