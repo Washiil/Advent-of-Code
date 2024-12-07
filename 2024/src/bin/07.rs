@@ -52,9 +52,10 @@ pub fn part_one(input: &str) -> Option<u64> {
 
         let target: u64 = split[0].parse::<u64>().expect("Invalid calibration target");
 
-        let nums: VecDeque<u64> = split[1]
+        let nums: Vec<u64> = split[1]
             .split(' ')
             .filter_map(|n| n.parse::<u64>().ok())
+            .rev()
             .collect();
 
         let num_of_operations = nums.len() - 1;
@@ -64,20 +65,20 @@ pub fn part_one(input: &str) -> Option<u64> {
         if permutations.iter().any(|perm| {
             let mut temp = nums.clone(); // Avoid borrowing `nums`
             for op in perm {
-                let n1 = temp.pop_front().unwrap();
+                let n1 = temp.pop().unwrap();
 
                 if n1 > target {
                     return false;
                 }
 
-                let n2 = temp.pop_front().unwrap();
+                let n2 = temp.pop().unwrap();
 
                 let new_val = match op {
                     Operator::Multiply => n1 * n2,
                     Operator::Add => n1 + n2,
                     _ => panic!("Invalid operators for part one!")
                 };
-                temp.push_front(new_val);
+                temp.push(new_val);
             }
 
             temp[0] == target
@@ -98,9 +99,10 @@ pub fn part_two(input: &str) -> Option<u64> {
 
         let target: u64 = split[0].parse::<u64>().expect("Invalid calibration target");
 
-        let nums: VecDeque<u64> = split[1]
+        let nums: Vec<u64> = split[1]
             .split(' ')
             .filter_map(|n| n.parse::<u64>().ok())
+            .rev()
             .collect();
 
         let num_of_operations = nums.len() - 1;
@@ -110,13 +112,13 @@ pub fn part_two(input: &str) -> Option<u64> {
         if permutations.iter().any(|perm| {
             let mut temp = nums.clone(); // Avoid borrowing `nums`
             for op in perm {
-                let n1 = temp.pop_front().unwrap();
+                let n1 = temp.pop().unwrap();
 
                 if n1 > target {
                     return false;
                 }
 
-                let n2 = temp.pop_front().unwrap();
+                let n2 = temp.pop().unwrap();
 
                 let new_val = match op {
                     Operator::Multiply => n1 * n2,
@@ -125,7 +127,7 @@ pub fn part_two(input: &str) -> Option<u64> {
                         format!("{}{}", n1.to_string(), n2.to_string()).parse::<u64>().unwrap()
                     }
                 };
-                temp.push_front(new_val);
+                temp.push(new_val);
             }
 
             temp[0] == target
