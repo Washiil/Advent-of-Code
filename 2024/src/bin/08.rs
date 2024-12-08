@@ -48,7 +48,54 @@ pub fn part_one(input: &str) -> Option<u32> {
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    None
+    // Stores coordinates in (x, y) format
+    let mut frequency_antennas: HashMap<u32, Vec<(i32, i32)>> = HashMap::new();
+    let mut unique_antinodes: HashSet<(i32, i32)> = HashSet::new();
+
+    let width = input.lines().next().unwrap_or("").len() as i32;
+    let height = input.lines().count() as i32;
+
+    for (y, row) in input.lines().enumerate() {
+        for (x, val) in row.chars().map(|c| c as u32).enumerate() {
+            if val != BLANK_SPACE {
+                frequency_antennas.entry(val)
+                    .or_insert_with(Vec::new)
+                    .push((x as i32, y as i32));
+            }
+        }
+    }
+
+    for (_, stations) in frequency_antennas {
+        let n = stations.len();
+        
+        for i in 0..n {
+            for j in i + 1..n {
+                let (x1, y1) = stations[i];
+                let (x2, y2) = stations[j];
+                unique_antinodes.insert(stations[i]);
+                unique_antinodes.insert(stations[j]);
+
+                let dx = x2 - x1;
+                let dy = y2 - y1;
+
+                // Anti-Node direction 1
+                let mut node = (x1 - dx, y1 - dy);
+
+                while node.0 >= 0 && node.0 < width && node.1 >= 0 && node.1 < height {
+                    unique_antinodes.insert(node);
+                    node = (node.0 - dx, node.1 - dy);
+                }
+
+                let mut node = (x2 + dx, y2 + dy);
+
+                while node.0 >= 0 && node.0 < width && node.1 >= 0 && node.1 < height {
+                    unique_antinodes.insert(node);
+                    node = (node.0 + dx, node.1 + dy);
+                }
+            }
+        }
+    }
+    Some(unique_antinodes.len() as u32)
 }
 
 #[cfg(test)]
@@ -64,6 +111,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
+        assert_eq!(result, Some(34));
     }
 }
