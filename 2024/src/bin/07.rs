@@ -19,9 +19,7 @@ fn evaluate_expression(nums: &[u64], perm: &[Operator], target: u64) -> bool {
         let new_val = match op {
             Operator::Multiply => n1 * n2,
             Operator::Add => n1 + n2,
-            Operator::Concatenate => {
-                format!("{}{}", n1, n2).parse::<u64>().unwrap()
-            }
+            Operator::Concatenate => format!("{}{}", n1, n2).parse::<u64>().unwrap(),
         };
         temp.push(new_val);
     }
@@ -55,26 +53,30 @@ fn generate_permutations(operators: &[Operator], length: usize) -> Vec<Vec<Opera
 pub fn part_one(input: &str) -> Option<u64> {
     const OPERATORS: [Operator; 2] = [Operator::Multiply, Operator::Add];
 
-    let output: u64 = input.lines().filter_map(|line| {
-        let split: Vec<&str> = line.split(": ").collect();
-        let target: u64 = split[0].parse().ok()?;
-        let nums: Vec<u64> = split[1]
-            .split(' ')
-            .filter_map(|n| n.parse::<u64>().ok())
-            .rev()
-            .collect();
+    let output: u64 = input
+        .lines()
+        .filter_map(|line| {
+            let split: Vec<&str> = line.split(": ").collect();
+            let target: u64 = split[0].parse().ok()?;
+            let nums: Vec<u64> = split[1]
+                .split(' ')
+                .filter_map(|n| n.parse::<u64>().ok())
+                .rev()
+                .collect();
 
-        let num_of_operations = nums.len() - 1;
+            let num_of_operations = nums.len() - 1;
 
-        let permutations = generate_permutations(&OPERATORS, num_of_operations);
+            let permutations = generate_permutations(&OPERATORS, num_of_operations);
 
-        if permutations.iter().any(|perm| {
-            evaluate_expression(&nums, perm, target)
-        }) {
-            return Some(target);
-        }
-        None
-    }).sum();
+            if permutations
+                .iter()
+                .any(|perm| evaluate_expression(&nums, perm, target))
+            {
+                return Some(target);
+            }
+            None
+        })
+        .sum();
 
     Some(output)
 }
@@ -82,26 +84,30 @@ pub fn part_one(input: &str) -> Option<u64> {
 pub fn part_two(input: &str) -> Option<u64> {
     const OPERATORS: [Operator; 3] = [Operator::Add, Operator::Multiply, Operator::Concatenate];
 
-    let output: u64 = input.lines().filter_map(|line| {
-        let split: Vec<&str> = line.split(": ").collect();
-        let target: u64 = split[0].parse().ok()?;
-        let nums: Vec<u64> = split[1]
-            .split(' ')
-            .filter_map(|n| n.parse::<u64>().ok())
-            .rev()
-            .collect();
+    let output: u64 = input
+        .lines()
+        .filter_map(|line| {
+            let split: Vec<&str> = line.split(": ").collect();
+            let target: u64 = split[0].parse().ok()?;
+            let nums: Vec<u64> = split[1]
+                .split(' ')
+                .filter_map(|n| n.parse::<u64>().ok())
+                .rev()
+                .collect();
 
-        let num_of_operations = nums.len() - 1;
+            let num_of_operations = nums.len() - 1;
 
-        let permutations = generate_permutations(&OPERATORS, num_of_operations);
+            let permutations = generate_permutations(&OPERATORS, num_of_operations);
 
-        if permutations.iter().any(|perm| {
-            evaluate_expression(&nums, perm, target)
-        }) {
-            return Some(target);
-        }
-        None
-    }).sum();
+            if permutations
+                .iter()
+                .any(|perm| evaluate_expression(&nums, perm, target))
+            {
+                return Some(target);
+            }
+            None
+        })
+        .sum();
 
     Some(output)
 }
