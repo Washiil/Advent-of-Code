@@ -1,7 +1,10 @@
 advent_of_code::solution!(9);
 
 pub fn part_one(s: &str) -> Option<u64> {
-    let nums: Vec<usize> = s.chars().map(|c| c.to_digit(10).unwrap() as usize).collect();
+    let nums: Vec<usize> = s
+        .chars()
+        .map(|c| c.to_digit(10).unwrap() as usize)
+        .collect();
 
     let mut blocks: Vec<Option<usize>> = Vec::new();
     let mut free_spots: Vec<usize> = Vec::new();
