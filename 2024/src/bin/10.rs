@@ -2,20 +2,16 @@ use std::collections::{HashMap, HashSet};
 
 advent_of_code::solution!(10);
 
-const DIRS: [(isize, isize); 4] = [(-1, 0), (1, 0), (0, -1), (0, 1)];
-const TARGET: u32 = 9;
-
 fn calculate_trailhead_score(
     map: &Vec<Vec<u32>>,
     y: usize,
     x: usize,
     visited: &mut HashSet<(usize, usize)>,
 ) -> u32 {
-    // Base Case
-    if visited.contains(&(y, x)) {
+    // Combine the check and insert for better performance
+    if !visited.insert((y, x)) {
         return 0;
     }
-    visited.insert((y, x));
 
     if map[y][x] == 9 {
         return 1;
@@ -24,35 +20,26 @@ fn calculate_trailhead_score(
     let height = map.len();
     let width = map[0].len();
     let val = map[y][x];
-
     let mut score = 0;
 
-    // Check above
-    if y > 0 {
-        if map[y - 1][x] == val + 1 {
-            score += calculate_trailhead_score(map, y - 1, x, visited)
-        }
-    }
+    // Pre-check conditions to avoid unnecessary comparisons
+    let check_above = y > 0 && map[y - 1][x] == val + 1;
+    let check_left = x > 0 && map[y][x - 1] == val + 1;
+    let check_right = x + 1 < width && map[y][x + 1] == val + 1;
+    let check_below = y + 1 < height && map[y + 1][x] == val + 1;
 
-    // Check left
-    if x > 0 {
-        if map[y][x - 1] == val + 1 {
-            score += calculate_trailhead_score(map, y, x - 1, visited)
-        }
+    // Only recurse if condition is true
+    if check_above {
+        score += calculate_trailhead_score(map, y - 1, x, visited);
     }
-
-    // Check right
-    if x + 1 < width {
-        if map[y][x + 1] == val + 1 {
-            score += calculate_trailhead_score(map, y, x + 1, visited)
-        }
+    if check_left {
+        score += calculate_trailhead_score(map, y, x - 1, visited);
     }
-
-    // Check below
-    if y + 1 < height {
-        if map[y + 1][x] == val + 1 {
-            score += calculate_trailhead_score(map, y + 1, x, visited)
-        }
+    if check_right {
+        score += calculate_trailhead_score(map, y, x + 1, visited);
+    }
+    if check_below {
+        score += calculate_trailhead_score(map, y + 1, x, visited);
     }
 
     score
@@ -63,8 +50,6 @@ fn calculate_unique_trailhead_score(
     y: usize,
     x: usize,
 ) -> u32 {
-    // Base Case
-
     if map[y][x] == 9 {
         return 1;
     }
@@ -72,35 +57,26 @@ fn calculate_unique_trailhead_score(
     let height = map.len();
     let width = map[0].len();
     let val = map[y][x];
-
     let mut score = 0;
 
-    // Check above
-    if y > 0 {
-        if map[y - 1][x] == val + 1 {
-            score += calculate_unique_trailhead_score(map, y - 1, x)
-        }
-    }
+    // Pre-check conditions to avoid unnecessary comparisons
+    let check_above = y > 0 && map[y - 1][x] == val + 1;
+    let check_left = x > 0 && map[y][x - 1] == val + 1;
+    let check_right = x + 1 < width && map[y][x + 1] == val + 1;
+    let check_below = y + 1 < height && map[y + 1][x] == val + 1;
 
-    // Check left
-    if x > 0 {
-        if map[y][x - 1] == val + 1 {
-            score += calculate_unique_trailhead_score(map, y, x - 1)
-        }
+    // Only recurse if condition is true
+    if check_above {
+        score += calculate_unique_trailhead_score(map, y - 1, x);
     }
-
-    // Check right
-    if x + 1 < width {
-        if map[y][x + 1] == val + 1 {
-            score += calculate_unique_trailhead_score(map, y, x + 1)
-        }
+    if check_left {
+        score += calculate_unique_trailhead_score(map, y, x - 1);
     }
-
-    // Check below
-    if y + 1 < height {
-        if map[y + 1][x] == val + 1 {
-            score += calculate_unique_trailhead_score(map, y + 1, x)
-        }
+    if check_right {
+        score += calculate_unique_trailhead_score(map, y, x + 1);
+    }
+    if check_below {
+        score += calculate_unique_trailhead_score(map, y + 1, x);
     }
 
     score
