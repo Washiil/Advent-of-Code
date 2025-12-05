@@ -47,7 +47,8 @@ pub fn part_one(input: &str) -> Option<u64> {
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
-        let mut joltage = 0;
+    let mut joltage = 0;
+    let group_size = 12;
     for line in input.lines() {
         if line.trim().is_empty() {
             continue;
@@ -58,7 +59,12 @@ pub fn part_two(input: &str) -> Option<u64> {
             .map(|c| c.to_digit(10).expect("Invalid Input"))
             .collect::<Vec<u32>>();
 
-        joltage += num;
+        charges.sort();
+        charges.reverse();
+
+        
+
+        joltage += 0;
     }
 
     Some(joltage as u64)
