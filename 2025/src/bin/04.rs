@@ -65,7 +65,33 @@ pub fn part_one(input: &str) -> Option<u64> {
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
-    None
+    let mut rolls = input.lines().map(|line| line.chars().collect::<Vec<char>>()).collect::<Vec<Vec<char>>>();
+    let rows = rolls.len();
+    let cols = rolls[0].len();
+
+    let squares = rows * cols;
+
+    let mut valid_rolls = 0;
+
+    for _ in 0..squares {
+        for r in 0..rows {
+            for c in 0..cols {
+                if rolls[r][c] != '@' {
+                    continue;
+                }
+    
+                let adj = count_adjacent(&rolls, r, c);
+                if adj >= 4 {
+                    continue;
+                }
+    
+                rolls[r][c] = '.';
+    
+                valid_rolls += 1;
+            }
+        }
+    }
+    Some(valid_rolls)
 }
 
 #[cfg(test)]
@@ -81,6 +107,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
+        assert_eq!(result, Some(43));
     }
 }
