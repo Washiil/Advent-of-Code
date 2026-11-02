@@ -33,26 +33,21 @@ pub fn part_one(input: &str) -> Option<u64> {
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
-    let row_size = input.lines().next()?.len();
-    let mut worlds = vec![0; row_size + 2];
+    let mut lines = input.lines().step_by(2);
+    let first_line = lines.next()?;
+    let start = first_line.find('S')?;
 
-    for line in input.lines().step_by(2) {
-        for (idx, c) in line.chars().enumerate() {
-            if c == 'S' {
-                worlds[idx + 1] = 1;
-                continue;
-            }
-            if c == '.' || worlds[idx + 1] == 0 {
-                continue;
-            };
+    // Padded to avoid bounds checking
+    let mut worlds = vec![0u64; first_line.len() + 2];
+    worlds[start + 1] = 1;
 
-            // Count by the number of worlds going in
-            worlds[idx] += worlds[idx + 1];
-            worlds[idx + 2] += worlds[idx + 1];
-
-            worlds[idx + 1] = 0;
+    for line in lines {
+        for (col, _) in line.match_indices('^') {
+            let i = col + 1;
+            let count = std::mem::take(&mut worlds[i]);
+            worlds[i - 1] += count;
+            worlds[i + 1] += count;
         }
-        println!("{:?}", worlds);
     }
 
     Some(worlds.iter().sum())
