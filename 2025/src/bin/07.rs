@@ -1,25 +1,4 @@
-use std::{collections::HashSet, panic};
-
 advent_of_code::solution!(7);
-
-enum ManifoldPart {
-    Origin,
-    Split,
-    Blank,
-}
-
-impl TryFrom<char> for ManifoldPart {
-    type Error = String;
-
-    fn try_from(c: char) -> Result<Self, Self::Error> {
-        match c {
-            'S' => Ok(ManifoldPart::Origin),
-            '^' => Ok(ManifoldPart::Split),
-            '.' => Ok(ManifoldPart::Blank),
-            _ => Err(format!("'{}' is not a valid input!", c)),
-        }
-    }
-}
 
 pub fn part_one(input: &str) -> Option<u64> {
     let row_size = input.lines().next()?.len();
@@ -30,7 +9,7 @@ pub fn part_one(input: &str) -> Option<u64> {
     let mut beams_curr = vec![false; row_size + 2];
     let mut beams_next = vec![false; row_size + 2];
 
-    for line in input.lines() {
+    for line in input.lines().step_by(2) {
         for (idx, c) in line.chars().enumerate() {
             if c == 'S' {
                 beams_next[idx + 1] = true;
@@ -54,7 +33,29 @@ pub fn part_one(input: &str) -> Option<u64> {
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
-    None
+    let row_size = input.lines().next()?.len();
+    let mut worlds = vec![0; row_size + 2];
+
+    for line in input.lines().step_by(2) {
+        for (idx, c) in line.chars().enumerate() {
+            if c == 'S' {
+                worlds[idx + 1] = 1;
+                continue;
+            }
+            if c == '.' || worlds[idx + 1] == 0 {
+                continue;
+            };
+
+            // Count by the number of worlds going in
+            worlds[idx] += worlds[idx + 1];
+            worlds[idx + 2] += worlds[idx + 1];
+
+            worlds[idx + 1] = 0;
+        }
+        println!("{:?}", worlds);
+    }
+
+    Some(worlds.iter().sum())
 }
 
 #[cfg(test)]
@@ -70,6 +71,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
+        assert_eq!(result, Some(40));
     }
 }
