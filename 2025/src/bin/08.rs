@@ -3,9 +3,9 @@ use std::collections::HashMap;
 advent_of_code::solution!(8);
 
 struct Point {
-    x: u32,
-    y: u32,
-    z: u32,
+    x: u64,
+    y: u64,
+    z: u64,
 }
 
 type Rank = usize;
@@ -69,7 +69,52 @@ pub fn part_one(input: &str) -> Option<u64> {
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
-    None
+    let lines = input.lines();
+    let mut points: Vec<Point> = Vec::new();
+
+    // Parse all of the points
+    for line in lines {
+        let mut iter = line.split(',');
+        let x = iter.next()?.parse().expect("Invalid Input");
+        let y = iter.next()?.parse().expect("Invalid Input");
+        let z = iter.next()?.parse().expect("Invalid Input");
+        points.push(Point { x, y, z })
+    }
+
+    let mut distances: Vec<(u64, usize, usize)> = Vec::new();
+    for i in 0..points.len() {
+        for j in i + 1..points.len() {
+            distances.push((distance_squared(&points[i], &points[j]), i, j))
+        }
+    }
+
+    distances.sort_by_key(|&(dist, _, _)| dist);
+
+    let mut circuits = (0..points.len()).collect::<Vec<Rank>>();
+    let mut unique = points.len();
+
+    // Now join
+    for i in 0..distances.len() {
+        let (_, p1, p2) = distances[i];
+        // Already in Same Circuit
+        if circuits[p1] == circuits[p2] {
+            continue;
+        }
+        let shared_circuit = circuits[p1].min(circuits[p2]);
+        let c1 = circuits[p1];
+        let c2 = circuits[p2];
+        for i in 0..circuits.len() {
+            if circuits[i] == c1 || circuits[i] == c2 {
+                circuits[i] = shared_circuit;
+            }
+        }
+        unique -= 1;
+        if unique == 1 {
+            return Some(points[p1].x * points[p2].x);
+        }
+    }
+
+    Some(0)
 }
 
 #[cfg(test)]
@@ -85,6 +130,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
+        assert_eq!(result, Some(25272));
     }
 }
