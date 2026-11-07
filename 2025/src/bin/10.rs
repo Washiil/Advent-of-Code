@@ -1,251 +1,149 @@
-use std::{
-    collections::{HashSet, VecDeque},
-    str::FromStr,
-};
+use good_lp::{Expression, Solution, SolverModel, constraint, microlp, variable, variables};
+use std::collections::{HashSet, VecDeque};
+use std::fmt::Display;
+use std::str::FromStr;
 
 advent_of_code::solution!(10);
 
-fn delimited(s: &str, open: char, close: char) -> Result<&str, String> {
-    s.strip_prefix(open)
-        .and_then(|s| s.strip_suffix(close))
-        .ok_or_else(|| format!("expected {open}...{close}, got {s:?}"))
+type LightMask = u16;
+
+struct Button {
+    wiring: Vec<usize>,
 }
-
-#[derive(Debug)]
-struct Indicator(u16);
-
-impl FromStr for Indicator {
-    type Err = String;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let inner = delimited(s, '[', ']')?;
-
-        let mut mask: u16 = 0;
-        for (i, c) in inner.chars().enumerate() {
-            if c == '#' {
-                // bit shift 1 to the left by i places
-                mask |= 1 << i;
-            }
-        }
-
-        Ok(Indicator(mask))
-    }
-}
-
-#[derive(Debug)]
-struct Button(Vec<usize>);
 
 impl Button {
-    fn mask(&self) -> u16 {
-        self.0.iter().fold(0, |mask, &i| mask | (1 << i))
+    fn light_mask(&self) -> LightMask {
+        self.wiring.iter().fold(0, |mask, &i| mask | (1 << i))
     }
-}
 
-impl FromStr for Button {
-    type Err = String;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        delimited(s, '(', ')')?
-            .split(',')
-            .map(|n| {
-                n.parse::<usize>()
-                    .map_err(|e| format!("invalid number {n:?}: {e}"))
-            })
-            .collect::<Result<Vec<_>, _>>()
-            .map(Button)
-    }
-}
-
-#[derive(Debug)]
-struct Joltage(Vec<u16>);
-
-impl FromStr for Joltage {
-    type Err = String;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let inner = delimited(s, '{', '}')?;
-
-        inner
-            .split(',')
-            .map(|n| {
-                n.parse::<u16>()
-                    .map_err(|e| format!("invalid number {n:?}: {e}"))
-            })
-            .collect::<Result<Vec<_>, _>>()
-            .map(Joltage)
+    fn affects(&self, index: usize) -> bool {
+        self.wiring.contains(&index)
     }
 }
 
 struct Machine {
-    indicator: Indicator,
+    target_lights: LightMask,
     buttons: Vec<Button>,
-    joltage: Joltage,
+    target_joltages: Vec<u16>,
 }
 
-impl std::str::FromStr for Machine {
+fn parse_machines(input: &str) -> impl Iterator<Item = Machine> + '_ {
+    input
+        .lines()
+        .map(|line| line.parse().expect("invalid machine"))
+}
+
+impl FromStr for Machine {
     type Err = String;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut tokens = s.split_whitespace();
-
-        let indicator = tokens.next().ok_or("missing indicators")?.parse()?;
-        let joltage = tokens.next_back().ok_or("missing joltage")?.parse()?;
-        let buttons = tokens.map(str::parse).collect::<Result<_, _>>()?;
+    fn from_str(line: &str) -> Result<Self, Self::Err> {
+        let mut tokens = line.split_whitespace();
+        let lights = tokens.next().ok_or("missing indicator lights")?;
+        let joltages = tokens.next_back().ok_or("missing joltages")?;
+        // Everything left between the first and last token is a button.
+        let buttons = tokens.map(parse_button).collect::<Result<_, _>>()?;
 
         Ok(Machine {
-            indicator,
+            target_lights: parse_lights(lights)?,
             buttons,
-            joltage,
+            target_joltages: parse_list(unwrap_brackets(joltages, '{', '}')?)?,
         })
     }
 }
 
-fn constraint_matrix(buttons: &[Button], targets: &[u16]) -> Vec<Vec<i64>> {
-    let rows = targets.len();
-    let cols = buttons.len();
-    let mut matrix = vec![vec![0; cols + 1]; rows];
-
-    for (col, btn) in buttons.iter().enumerate() {
-        for &row in &btn.0 {
-            matrix[row][col] = 1;
-        }
-    }
-
-    for (row, &target) in targets.iter().enumerate() {
-        matrix[row][cols] = i64::from(target);
-    }
-
-    matrix
+/// `[.##.]` -> bits 1 and 2 set.
+fn parse_lights(s: &str) -> Result<LightMask, String> {
+    let mask = unwrap_brackets(s, '[', ']')?
+        .chars()
+        .enumerate()
+        .filter(|&(_, c)| c == '#')
+        .fold(0, |mask, (i, _)| mask | (1 << i));
+    Ok(mask)
 }
 
-fn reduce(matrix: &mut [Vec<i64>]) -> Vec<usize> {
-    let rows = matrix.len();
-    let cols = matrix.first().map_or(0, |row| row.len() - 1);
-
-    let mut pivots = Vec::new();
-    for col in 0..cols {
-        let r = pivots.len();
-
-        if r == rows {
-            break;
-        }
-
-        let Some(found) = (r..rows).find(|&i| matrix[i][col] != 0) else {
-            continue;
-        };
-
-        matrix.swap(r, found);
-        clear_column(matrix, r, col);
-        pivots.push(col);
-    }
-
-    pivots
+/// `(1,3)` -> a button wired to indices 1 and 3.
+fn parse_button(s: &str) -> Result<Button, String> {
+    let wiring = parse_list(unwrap_brackets(s, '(', ')')?)?;
+    Ok(Button { wiring })
 }
 
-fn clear_column(matrix: &mut [Vec<i64>], pivot_row: usize, col: usize) {
-    let pivot = matrix[pivot_row].clone();
-    let p = pivot[col];
+/// Strips `open` and `close` from the ends of `s`.
+fn unwrap_brackets(s: &str, open: char, close: char) -> Result<&str, String> {
+    s.strip_prefix(open)
+        .and_then(|inner| inner.strip_suffix(close))
+        .ok_or_else(|| format!("expected {open}...{close}, got {s:?}"))
+}
 
-    for (i, row) in matrix.iter_mut().enumerate() {
-        let x = row[col];
-
-        // Skip the pivot row and cleared rows
-        if i == pivot_row || x == 0 {
-            continue;
-        }
-
-        // Perform the row * p − pivot * x simplification as on paper
-        for (value, &pivot_value) in row.iter_mut().zip(&pivot) {
-            *value = *value * p - pivot_value * x;
-        }
-    }
+/// Parses a comma-separated list such as `3,5,4,7`.
+fn parse_list<T>(s: &str) -> Result<Vec<T>, String>
+where
+    T: FromStr,
+    T::Err: Display,
+{
+    s.split(',')
+        .map(|n| n.parse().map_err(|e| format!("invalid number {n:?}: {e}")))
+        .collect()
 }
 
 pub fn part_one(input: &str) -> Option<u64> {
-    let mut seen: HashSet<u16> = HashSet::new();
-    let mut queue: VecDeque<(u64, u16)> = VecDeque::new();
-    input
-        .lines()
-        .map(|line| {
-            let machine = line.parse::<Machine>().expect("Invalid");
-            queue.clear();
-            seen.clear();
-            queue.push_back((0, 0));
-            seen.insert(0);
-
-            while let Some((depth, state)) = queue.pop_front() {
-                if state == machine.indicator.0 {
-                    return Some(depth);
-                }
-                for btn in &machine.buttons {
-                    let next = state ^ btn.mask();
-                    if seen.contains(&next) {
-                        continue;
-                    }
-                    seen.insert(next);
-                    queue.push_back((depth + 1, next));
-                }
-            }
-
-            None
-        })
+    parse_machines(input)
+        .map(|machine| fewest_presses_for_lights(&machine))
         .sum()
 }
 
-fn search(
-    matrix: &[Vec<i64>],
-    pivots: &[usize],
-    free: &[usize],
-    limit: i64,
-    presses: &mut [i64],
-    depth: usize,
-) -> Option<i64> {
-    if depth < free.len() {
-        return (0..=limit)
-            .filter_map(|value| {
-                presses[free[depth]] = value;
-                search(matrix, pivots, free, limit, presses, depth + 1)
-            })
-            .min();
-    }
+fn fewest_presses_for_lights(machine: &Machine) -> Option<u64> {
+    let button_masks: Vec<LightMask> = machine.buttons.iter().map(Button::light_mask).collect();
 
-    for (row, &col) in matrix.iter().zip(pivots) {
-        let target = row[row.len() - 1];
-        let free_terms: i64 = free.iter().map(|&f| row[f] * presses[f]).sum();
-        let remaining = target - free_terms;
-        let pivot = row[col];
+    let mut seen: HashSet<LightMask> = HashSet::from([0]);
+    let mut queue: VecDeque<(LightMask, u64)> = VecDeque::from([(0, 0)]);
 
-        if remaining % pivot != 0 || remaining / pivot < 0 {
-            return None;
+    while let Some((lights, presses)) = queue.pop_front() {
+        if lights == machine.target_lights {
+            return Some(presses);
         }
-        presses[col] = remaining / pivot;
+        for &mask in &button_masks {
+            let next = lights ^ mask;
+            if seen.insert(next) {
+                queue.push_back((next, presses + 1));
+            }
+        }
     }
 
-    Some(presses.iter().sum())
+    None
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
-    input
-        .lines()
-        .map(|line| {
-            let machine = line.parse::<Machine>().expect("Invalid");
-            let targets = &machine.joltage.0;
-            let buttons = machine.buttons.len();
+    let mut total = 0;
+    for machine in parse_machines(input) {
+        total += fewest_presses_for_joltage(&machine)?;
+    }
+    Some(total)
+}
 
-            let mut matrix = constraint_matrix(&machine.buttons, targets);
-            let pivots = reduce(&mut matrix);
+fn fewest_presses_for_joltage(machine: &Machine) -> Option<u64> {
+    let mut vars = variables!();
+    let presses = vars.add_vector(variable().integer().min(0), machine.buttons.len());
 
-            // Every button without a pivot is free
-            let free: Vec<usize> = (0..buttons).filter(|c| !pivots.contains(c)).collect();
+    let mut total_presses = Expression::from(0);
+    for &press_count in &presses {
+        total_presses += press_count;
+    }
 
-            // No button needs more presses than the largest target
-            let limit = i64::from(*targets.iter().max()?);
+    let mut problem = vars.minimise(total_presses.clone()).using(microlp);
 
-            let mut presses = vec![0; buttons];
-            let total = search(&matrix, &pivots, &free, limit, &mut presses, 0)?;
-            u64::try_from(total).ok()
-        })
-        .sum()
+    for (counter, &target) in machine.target_joltages.iter().enumerate() {
+        let mut counter_value = Expression::from(0);
+        for (button, &press_count) in machine.buttons.iter().zip(&presses) {
+            if button.affects(counter) {
+                counter_value += press_count;
+            }
+        }
+        problem = problem.with(constraint!(counter_value == f64::from(target)));
+    }
+
+    let solution = problem.solve().ok()?;
+
+    Some(solution.eval(total_presses).round() as u64)
 }
 
 #[cfg(test)]
