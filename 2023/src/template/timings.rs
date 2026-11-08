@@ -31,17 +31,10 @@ impl Timings {
 
     /// Rehydrate timings from a JSON file. If not present, returns empty timings.
     pub fn read_from_file() -> Self {
-        let s = fs::read_to_string(TIMINGS_FILE_PATH)
+        fs::read_to_string(TIMINGS_FILE_PATH)
             .map_err(|x| x.to_string())
-            .and_then(Timings::try_from);
-
-        match s {
-            Ok(timings) => timings,
-            Err(e) => {
-                eprintln!("{e}");
-                Timings::default()
-            }
-        }
+            .and_then(Timings::try_from)
+            .unwrap_or_default()
     }
 
     /// Merge two sets of timings, overwriting `self` with `other` if present.
@@ -58,7 +51,7 @@ impl Timings {
             }
         }
 
-        data.sort_unstable_by(|a, b| a.day.cmp(&b.day));
+        data.sort_unstable_by_key(|a| a.day);
         Timings { data }
     }
 
@@ -68,9 +61,9 @@ impl Timings {
     }
 
     pub fn is_day_complete(&self, day: Day) -> bool {
-        self.data
-            .iter()
-            .any(|t| t.day == day && t.part_1.is_some() && t.part_2.is_some())
+        self.data.iter().any(|t| {
+            t.day == day && t.part_1.is_some() && (t.part_2.is_some() || !day.has_part_two())
+        })
     }
 }
 
@@ -184,7 +177,7 @@ impl TryFrom<&JsonValue> for Timing {
 
 /* -------------------------------------------------------------------------- */
 
-#[cfg(feature = "test_lib")]
+#[cfg(all(test, feature = "test_lib"))]
 mod tests {
     use crate::day;
 
@@ -260,7 +253,7 @@ mod tests {
         #[test]
         fn serializes_timings() {
             let timings = get_mock_timings();
-            let value = JsonValue::try_from(timings).unwrap();
+            let value = JsonValue::from(timings);
             assert_eq!(
                 value
                     .get::<HashMap<String, JsonValue>>()
@@ -278,7 +271,10 @@ mod tests {
     mod is_day_complete {
         use crate::{
             day,
-            template::timings::{Timing, Timings},
+            template::{
+                LAST_DAY,
+                timings::{Timing, Timings},
+            },
         };
 
         #[test]
@@ -292,7 +288,7 @@ mod tests {
                 }],
             };
 
-            assert_eq!(timings.is_day_complete(&day!(1)), true);
+            assert!(timings.is_day_complete(day!(1)));
         }
 
         #[test]
@@ -306,7 +302,21 @@ mod tests {
                 }],
             };
 
-            assert_eq!(timings.is_day_complete(&day!(1)), false);
+            assert!(!timings.is_day_complete(day!(1)));
+        }
+
+        #[test]
+        fn handles_last_day_without_part_two() {
+            let timings = Timings {
+                data: vec![Timing {
+                    day: day!(LAST_DAY),
+                    part_1: Some("1ms".into()),
+                    part_2: None,
+                    total_nanos: 1_000_000_000_f64,
+                }],
+            };
+
+            assert!(timings.is_day_complete(day!(LAST_DAY)));
         }
 
         #[test]
@@ -320,7 +330,7 @@ mod tests {
                 }],
             };
 
-            assert_eq!(timings.is_day_complete(&day!(1)), false);
+            assert!(!timings.is_day_complete(day!(1)));
         }
     }
 

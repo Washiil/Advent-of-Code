@@ -10,3 +10,7 @@ time = "run --quiet --release -- time"
 
 [env]
 AOC_YEAR = "2023"
+
+# Per-year target dir so day binaries from different years do not collide in the workspace target
+[build]
+target-dir = "target"

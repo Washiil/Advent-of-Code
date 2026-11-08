@@ -1,0 +1,7 @@
+{
+    // rust-analyzer checks the whole workspace from the root; give it its own target dir
+    // so it neither collides with nor blocks the per-year `YYYY/target` builds
+    "rust-analyzer.cargo.targetDir": true,
+    // Show clippy lints (e.g. stray prints in solutions) inline
+    "rust-analyzer.check.command": "clippy"
+}

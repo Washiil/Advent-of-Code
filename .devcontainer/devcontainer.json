@@ -1,0 +1,26 @@
+{
+    "name": "advent-of-code-rust",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "remoteUser": "vscode",
+    // aoc-cli reads the session token from this variable; set it on the host before opening the container
+    "remoteEnv": {
+        "ADVENT_OF_CODE_SESSION": "${localEnv:ADVENT_OF_CODE_SESSION}"
+    },
+    // perf (used by cargo flamegraph) needs access to performance counters
+    "capAdd": ["SYS_PTRACE", "PERFMON"],
+    "securityOpt": ["seccomp=unconfined"],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "rust-lang.rust-analyzer",
+                "vadimcn.vscode-lldb",
+                "editorConfig.editorConfig",
+                "anthropic.claude-code",
+                "openai.chatgpt"
+            ]
+        }
+    },
+    "postCreateCommand": "rustc --version && aoc --version"
+}

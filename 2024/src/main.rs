@@ -1,5 +1,7 @@
+#![allow(clippy::print_stdout, clippy::print_stderr)]
+
 use advent_of_code::template::commands::{all, download, read, scaffold, solve, time};
-use args::{parse, AppArguments};
+use args::{AppArguments, parse};
 
 #[cfg(feature = "today")]
 use advent_of_code::template::Day;
@@ -133,7 +135,8 @@ fn main() {
                     None => {
                         eprintln!(
                             "`today` command can only be run between the 1st and \
-                            the 25th of december. Please use `scaffold` with a specific day."
+                            the {}th of december. Please use `scaffold` with a specific day.",
+                            advent_of_code::template::LAST_DAY
                         );
                         process::exit(1)
                     }

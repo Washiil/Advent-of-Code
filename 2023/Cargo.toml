@@ -1,6 +1,6 @@
 [package]
-name = "advent_of_code"
-version = "0.10.0"
+name = "aoc_2023"
+version = "0.12.0"
 authors = ["Felix Spöttel <1682504+fspoettel@users.noreply.github.com>"]
 edition = "2021"
 default-run = "advent_of_code"
@@ -8,23 +8,37 @@ publish = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
+name = "advent_of_code"
 doctest = false
 
-[profile.dhat]
-inherits = "release"
-debug = 1
+# Keep the runner binary's name independent of the package name (used by default-run)
+[[bin]]
+name = "advent_of_code"
+path = "src/main.rs"
 
 [features]
 dhat-heap = ["dhat"]
 today = ["chrono"]
 test_lib = []
 
+[lints]
+workspace = true
+
 [dependencies]
 
 # Template dependencies
-chrono = { version = "0.4.31", optional = true }
-dhat = { version = "0.3.2", optional = true }
-pico-args = "0.5.0"
-tinyjson = "2.5.1"
+chrono = { workspace = true, optional = true }
+dhat = { workspace = true, optional = true }
+pico-args.workspace = true
+tinyjson.workspace = true
 
 # Solution dependencies
+bumpalo.workspace = true
+good_lp.workspace = true
+itertools.workspace = true
+num.workspace = true
+pathfinding.workspace = true
+rayon.workspace = true
+regex.workspace = true
+rustc-hash.workspace = true
+z3.workspace = true

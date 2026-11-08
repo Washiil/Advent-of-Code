@@ -9,6 +9,11 @@ use crate::template::Day;
 const MODULE_TEMPLATE: &str =
     include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/src/template.txt"));
 
+const LAST_DAY_MODULE_TEMPLATE: &str = include_str!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/src/template_last_day.txt"
+));
+
 fn safe_create_file(path: &str, overwrite: bool) -> Result<File, std::io::Error> {
     let mut file = OpenOptions::new();
     if overwrite {
@@ -40,13 +45,19 @@ pub fn handle(day: Day, overwrite: bool) {
         }
     };
 
-    match file.write_all(
+    let template = if day.has_part_two() {
         MODULE_TEMPLATE
+    } else {
+        LAST_DAY_MODULE_TEMPLATE
+    };
+
+    match file.write_all(
+        template
             .replace("%DAY_NUMBER%", &day.into_inner().to_string())
             .as_bytes(),
     ) {
         Ok(()) => {
-            println!("Created module file \"{}\"", &module_path);
+            println!("Created module file \"{}\"", module_path);
         }
         Err(e) => {
             eprintln!("Failed to write module contents: {e}");
@@ -56,7 +67,7 @@ pub fn handle(day: Day, overwrite: bool) {
 
     match create_file(&input_path) {
         Ok(_) => {
-            println!("Created empty input file \"{}\"", &input_path);
+            println!("Created empty input file \"{}\"", input_path);
         }
         Err(e) => {
             eprintln!("Failed to create input file: {e}");
@@ -66,7 +77,7 @@ pub fn handle(day: Day, overwrite: bool) {
 
     match create_file(&example_path) {
         Ok(_) => {
-            println!("Created empty example file \"{}\"", &example_path);
+            println!("Created empty example file \"{}\"", example_path);
         }
         Err(e) => {
             eprintln!("Failed to create example file: {e}");
