@@ -18,7 +18,7 @@ pub fn part_one(input: &str) -> Option<u32> {
             if val != BLANK_SPACE {
                 frequency_antennas
                     .entry(val)
-                    .or_insert_with(Vec::new)
+                    .or_default()
                     .push((x as i32, y as i32));
             }
         }
@@ -63,7 +63,7 @@ pub fn part_two(input: &str) -> Option<u32> {
             if val != BLANK_SPACE {
                 frequency_antennas
                     .entry(val)
-                    .or_insert_with(Vec::new)
+                    .or_default()
                     .push((x as i32, y as i32));
             }
         }

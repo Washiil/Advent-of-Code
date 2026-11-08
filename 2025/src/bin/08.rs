@@ -26,9 +26,9 @@ impl std::str::FromStr for Point {
 
 impl Point {
     pub fn dist_from(&self, other: &Point) -> u64 {
-        let dx = u64::from(self.x.abs_diff(other.x));
-        let dy = u64::from(self.y.abs_diff(other.y));
-        let dz = u64::from(self.z.abs_diff(other.z));
+        let dx = self.x.abs_diff(other.x);
+        let dy = self.y.abs_diff(other.y);
+        let dz = self.z.abs_diff(other.z);
 
         dx * dx + dy * dy + dz * dz
     }
@@ -47,8 +47,10 @@ pub fn part_one(input: &str) -> Option<u64> {
         }
     }
 
-    const JOINS: usize = 1000;
-    distances.select_nth_unstable_by_key(JOINS - 1, |&(dist, _, _)| dist);
+    // The example joins the 10 closest pairs, the real input the 1000 closest
+    let joins = if points.len() < 100 { 10 } else { 1000 };
+    distances.select_nth_unstable_by_key(joins - 1, |&(dist, _, _)| dist);
+    distances.truncate(joins);
 
     let mut circuits = (0..points.len()).collect::<Vec<usize>>();
 
@@ -57,9 +59,9 @@ pub fn part_one(input: &str) -> Option<u64> {
         let shared_circuit = circuits[p1].min(circuits[p2]);
         let c1 = circuits[p1];
         let c2 = circuits[p2];
-        for i in 0..circuits.len() {
-            if circuits[i] == c1 || circuits[i] == c2 {
-                circuits[i] = shared_circuit;
+        for circuit in circuits.iter_mut() {
+            if *circuit == c1 || *circuit == c2 {
+                *circuit = shared_circuit;
             }
         }
     }
@@ -103,9 +105,9 @@ pub fn part_two(input: &str) -> Option<u64> {
         let shared_circuit = circuits[p1].min(circuits[p2]);
         let c1 = circuits[p1];
         let c2 = circuits[p2];
-        for i in 0..circuits.len() {
-            if circuits[i] == c1 || circuits[i] == c2 {
-                circuits[i] = shared_circuit;
+        for circuit in circuits.iter_mut() {
+            if *circuit == c1 || *circuit == c2 {
+                *circuit = shared_circuit;
             }
         }
 

@@ -12,7 +12,7 @@ advent_of_code::solution!(4);
 .@@@@@@@@.
 @.@.@@@.@.
 */
-fn count_adjacent(board: &Vec<Vec<char>>, r: usize, c: usize) -> u8 {
+fn count_adjacent(board: &[Vec<char>], r: usize, c: usize) -> u8 {
 let rows = board.len() as isize;
     let cols = board[0].len() as isize;
     let mut adjacent = 0;
@@ -26,11 +26,10 @@ let rows = board.len() as isize;
             let new_r = (r as isize) + i;
             let new_c = (c as isize) + j;
 
-            if new_r >= 0 && new_r < rows && new_c >= 0 && new_c < cols {
-                if board[new_r as usize][new_c as usize] == '@' {
+            if new_r >= 0 && new_r < rows && new_c >= 0 && new_c < cols
+                && board[new_r as usize][new_c as usize] == '@' {
                     adjacent += 1;
                 }
-            }
         }
     }
 

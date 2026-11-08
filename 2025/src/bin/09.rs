@@ -10,7 +10,7 @@ struct Point {
 
 impl Point {
     pub fn dist(&self, other: &Point) -> u64 {
-        return (self.x.abs_diff(other.x) + 1) * (self.y.abs_diff(other.y) + 1);
+        (self.x.abs_diff(other.x) + 1) * (self.y.abs_diff(other.y) + 1)
     }
 }
 
@@ -115,7 +115,6 @@ pub fn part_two(input: &str) -> Option<u64> {
             continue;
         }
 
-        println!("{} {} -> {} {}", src.x, src.y, dest.x, dest.y);
         max_area = (src.x.abs_diff(dest.y) + 1) * (src.y.abs_diff(dest.y) + 1);
     }
 

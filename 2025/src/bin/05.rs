@@ -1,7 +1,5 @@
 advent_of_code::solution!(5);
 
-fn parse_ranges() {}
-
 pub fn part_one(input: &str) -> Option<u64> {
     let mut input_parts = input.split("\n\n");
     let mut result = 0;
@@ -15,8 +13,6 @@ pub fn part_one(input: &str) -> Option<u64> {
             let mut parts = line
                 .split("-")
                 .map(|v| v.parse::<i64>().expect("Invalid number"));
-            
-            println!("{:?}", line);
 
             let a = parts.next().expect("expected two numbers");
             let b = parts.next().expect("expected two numbers");
@@ -41,7 +37,7 @@ pub fn part_one(input: &str) -> Option<u64> {
     Some(result)
 }
 
-pub fn part_two(input: &str) -> Option<u64> {
+pub fn part_two(_input: &str) -> Option<u64> {
     None
 }
 

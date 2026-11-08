@@ -1,16 +1,14 @@
-use std::collections::btree_map::Range;
-
 advent_of_code::solution!(2);
 
 fn check_id(id: &str) -> bool {
     let l = id.len();
-    if l % 2 != 0 {
+    if !l.is_multiple_of(2) {
         return false;
     }
 
     let midpoint = l.div_ceil(2);
 
-    return &id[..midpoint] == &id[midpoint..]
+    id[..midpoint] == id[midpoint..]
 }
 
 pub fn part_one(input: &str) -> Option<u64> {
@@ -18,11 +16,11 @@ pub fn part_one(input: &str) -> Option<u64> {
     The ranges are separated by commas (,); each range gives its first ID and last ID separated by a dash (-).
     None of the numbers have leading zeroes; 0101 isn't an ID at all. (101 is a valid ID that you would ignore.)
      */
-    let id_ranges = input.split(",").collect::<Vec<&str>>();
+    let id_ranges = input.trim().split(",").collect::<Vec<&str>>();
     let mut output: u64 = 0;
 
     for r in id_ranges {
-        let bounds = r.split('-').collect::<Vec<&str>>();
+        let bounds = r.trim().split('-').collect::<Vec<&str>>();
         if bounds.len() < 2 {
             panic!("Invalid Input Lengths")
         }
@@ -38,30 +36,30 @@ pub fn part_one(input: &str) -> Option<u64> {
         }
     }
 
-    return Some(output)
+    Some(output)
 }
 
 fn check_id_2(id: &str) -> bool {
     let len = id.len();
 
     (1..=(len / 2))
-        .filter(|&g| len % g == 0)
+        .filter(|&g| len.is_multiple_of(g))
         .any(|win| {
             let pat = &id[0..win];
             (0..len)
                 .step_by(win)
-                .all(|x| 
+                .all(|x|
                     &id[x..(x+win)] == pat)
             }
         )
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
-    let id_ranges = input.split(",").collect::<Vec<&str>>();
+    let id_ranges = input.trim().split(",").collect::<Vec<&str>>();
     let mut output: u64 = 0;
 
     for r in id_ranges {
-        let bounds = r.split('-').collect::<Vec<&str>>();
+        let bounds = r.trim().split('-').collect::<Vec<&str>>();
         if bounds.len() < 2 {
             panic!("Invalid Input Lengths")
         }
@@ -77,7 +75,7 @@ pub fn part_two(input: &str) -> Option<u64> {
         }
     }
 
-    return Some(output)
+    Some(output)
 }
 
 #[cfg(test)]

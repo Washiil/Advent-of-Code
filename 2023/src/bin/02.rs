@@ -16,9 +16,7 @@ pub fn part_one(input: &str) -> Option<u32> {
     
     for line in lines {
         let data = line
-            .split(": ")
-            .skip(1)
-            .next()
+            .split(": ").nth(1)
             .unwrap();
 
         let mut valid = true;
@@ -85,7 +83,7 @@ pub fn part_two(input: &str) -> Option<u32> {
                 }
             }
         }
-        let product: u32 = colours.values().fold(1, |acc, x| acc * x);
+        let product: u32 = colours.values().product();
         total += product;
     }
     Some(total)

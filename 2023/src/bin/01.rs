@@ -14,7 +14,7 @@ pub fn part_one(input: &str) -> Option<u32> {
         let l = nums.last().unwrap();
         total += (f * 10) + l
     }
-    return Some(total);
+    Some(total)
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
@@ -66,7 +66,7 @@ pub fn part_two(input: &str) -> Option<u32> {
                 left += 3;
             }
             else {
-                output += &part[0..1].to_string();
+                output += &part[0..1];
                 left += 1;
             }
         }
@@ -82,7 +82,7 @@ pub fn part_two(input: &str) -> Option<u32> {
         total += (f * 10) + l
     }
     
-    return Some(total);
+    Some(total)
 }
 
 #[cfg(test)]

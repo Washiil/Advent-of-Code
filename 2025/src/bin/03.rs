@@ -17,7 +17,7 @@ pub fn part_one(input: &str) -> Option<u64> {
             .chars()
             .map(|c| c.to_digit(10).expect("Invalid Input"))
             .collect::<Vec<u32>>();
-        
+
         if charges.len() < 2 {
             panic!("Invalid Length of Input")
         }
@@ -26,7 +26,7 @@ pub fn part_one(input: &str) -> Option<u64> {
             .iter()
             .max()
             .expect("empty slice");
-        
+
         let mut found = false;
 
         let mut largest = 0;
@@ -48,7 +48,6 @@ pub fn part_one(input: &str) -> Option<u64> {
 
 pub fn part_two(input: &str) -> Option<u64> {
     let mut joltage = 0;
-    let group_size = 12;
     for line in input.lines() {
         if line.trim().is_empty() {
             continue;
@@ -62,7 +61,7 @@ pub fn part_two(input: &str) -> Option<u64> {
         charges.sort();
         charges.reverse();
 
-        
+
 
         joltage += 0;
     }

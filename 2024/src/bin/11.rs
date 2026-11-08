@@ -25,14 +25,10 @@ fn blink(stones: Vec<u64>) -> Vec<u64> {
         else {
             new_vec.push(stone * 2024);
         }
-        
+
     }
 
     new_vec
-}
-
-fn depth_blink(stone: u64, curr_depth: u32, maximum_depth: u32) -> u32 {
-
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
@@ -45,7 +41,7 @@ pub fn part_one(input: &str) -> Option<u32> {
     Some(stones.len() as u32)
 }
 
-pub fn part_two(input: &str) -> Option<u32> {
+pub fn part_two(_input: &str) -> Option<u32> {
     None
 }
 

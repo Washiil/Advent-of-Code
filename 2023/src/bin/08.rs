@@ -21,21 +21,19 @@ impl From<char> for Direction {
 fn gcd(mut a:u64, mut b:u64) -> u64{
     if a==b { return a; }
     if b > a {
-        let temp = a;
-        a = b;
-        b = temp;
+        std::mem::swap(&mut a, &mut b);
     }
     while b>0 {
         let temp = a;
         a = b;
         b = temp%b;
     }
-    return a;
+    a
 }
 
 fn lcm(a:u64, b:u64) -> u64{
     // LCM = a*b / gcd
-    return a*(b/gcd(a,b));
+    a*(b/gcd(a,b))
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
@@ -110,7 +108,7 @@ pub fn part_two(input: &str) -> Option<u64> {
         all_steps.push(steps);
     }
 
-    Some(all_steps.iter().fold(1, |acc, s| lcm(acc as u64, *s as u64)))
+    Some(all_steps.iter().fold(1, |acc, s| lcm(acc, *s as u64)))
 }
 
 #[cfg(test)]

@@ -2,6 +2,7 @@ advent_of_code::solution!(9);
 
 pub fn part_one(s: &str) -> Option<u64> {
     let nums: Vec<usize> = s
+        .trim()
         .chars()
         .map(|c| c.to_digit(10).unwrap() as usize)
         .collect();
@@ -33,7 +34,7 @@ pub fn part_one(s: &str) -> Option<u64> {
             break;
         }
         if let Some(val) = blocks.pop() {
-            if let Some(v) = val {
+            if let Some(_v) = val {
                 blocks[pos] = val;
             }
         }
@@ -53,7 +54,7 @@ pub fn part_one(s: &str) -> Option<u64> {
     Some(answer)
 }
 
-pub fn part_two(input: &str) -> Option<u32> {
+pub fn part_two(_input: &str) -> Option<u32> {
     None
 }
 

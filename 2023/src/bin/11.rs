@@ -13,7 +13,7 @@ impl Point {
     }
 }
 
-fn find_galaxies(universe: &Vec<Vec<char>>) -> Vec<Point> {
+fn find_galaxies(universe: &[Vec<char>]) -> Vec<Point> {
     let mut galaxies: Vec<Point> = Vec::new();
 
     for row in 0..universe.len() {
@@ -30,7 +30,7 @@ fn find_galaxies(universe: &Vec<Vec<char>>) -> Vec<Point> {
     galaxies
 }
 
-fn x_expansion(galaxies: &mut Vec<Point>, scalar: usize) {
+fn x_expansion(galaxies: &mut [Point], scalar: usize) {
     let mut sum_expansion = 0;
     let mut last_x = 0;
     for galaxy in galaxies.iter_mut() {
@@ -43,7 +43,7 @@ fn x_expansion(galaxies: &mut Vec<Point>, scalar: usize) {
     }
 }
 
-fn y_expansion(galaxies: &mut Vec<Point>, scalar: usize) {
+fn y_expansion(galaxies: &mut [Point], scalar: usize) {
     let mut sum_expansion = 0;
     let mut last_y = 0;
     for galaxy in galaxies.iter_mut() {

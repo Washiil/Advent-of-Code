@@ -1,6 +1,6 @@
 advent_of_code::solution!(3);
 
-fn number_from_line(line: &mut Vec<char>, index: usize) -> u32 {
+fn number_from_line(line: &mut [char], index: usize) -> u32 {
     let mut consecutive = String::new();
 
     // Check to the left of the index
@@ -27,7 +27,7 @@ fn number_from_line(line: &mut Vec<char>, index: usize) -> u32 {
     }
     let parsed_number: u32 = consecutive.parse().unwrap();
 
-    return parsed_number;
+    parsed_number
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
@@ -90,7 +90,7 @@ pub fn part_two(input: &str) -> Option<u32> {
                 }
             }
             if gears.len() == 2 {
-                total += gears.iter().fold(1, |acc, x| acc * x);
+                total += gears.iter().product::<u32>();
             }
         }
     }

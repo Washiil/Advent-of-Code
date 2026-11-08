@@ -15,16 +15,16 @@ enum HandType {
 }
 
 impl HandType {
-    pub fn from_hand(hand: &Vec<u32>, wilds: bool) -> HandType {
-        let mut pairs = vec![0; 5];
-        let mut cp = hand.clone();
+    pub fn from_hand(hand: &[u32], wilds: bool) -> HandType {
+        let mut pairs = [0; 5];
+        let mut cp = hand.to_vec();
 
         if wilds {
-            let number_of_wilds = hand.clone().iter().filter(|&n| *n == 1).count();
+            let number_of_wilds = hand.iter().filter(|&n| *n == 1).count();
 
             cp.retain(|&n| n != 1);
 
-            let unique: HashSet<u32> = HashSet::from_iter(cp.clone().into_iter());
+            let unique: HashSet<u32> = HashSet::from_iter(cp.clone());
 
             for u in &unique {
                 let x = cp.len();
@@ -41,7 +41,7 @@ impl HandType {
             // Shift right most non zero value to the right (wilds) amount of indecies.
         }
         else {
-            let unique: HashSet<u32> = HashSet::from_iter(cp.clone().into_iter());
+            let unique: HashSet<u32> = HashSet::from_iter(cp.clone());
             for u in &unique {
                 let x = cp.len();
                 cp.retain(|c| c != u);
@@ -68,7 +68,7 @@ impl HandType {
         else if pairs[1] == 1 {
             return HandType::OnePair
         }
-        return HandType::HighCard;
+        HandType::HighCard
     }
 }
 

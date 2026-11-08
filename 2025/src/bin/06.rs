@@ -1,5 +1,3 @@
-use std::panic::panic_any;
-
 advent_of_code::solution!(6);
 
 pub fn part_one(input: &str) -> Option<u64> {
@@ -42,7 +40,7 @@ pub fn part_one(input: &str) -> Option<u64> {
     Some(sum)
 }
 
-pub fn part_two(input: &str) -> Option<u64> {
+pub fn part_two(_input: &str) -> Option<u64> {
     None
 }
 

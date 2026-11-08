@@ -1,7 +1,7 @@
 advent_of_code::solution!(4);
 
 pub fn check_for_xmas(
-    board: &Vec<Vec<char>>,
+    board: &[Vec<char>],
     row: usize,
     col: usize,
     direction: (i32, i32),

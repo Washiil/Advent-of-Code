@@ -1,21 +1,20 @@
 use core::panic;
-use std::{i32, path::PathBuf};
 
 advent_of_code::solution!(1);
 
 pub fn part_one(input: &str) -> Option<u64> {
     /*
-    Because the dial is a circle, turning the dial left from 0 one click makes it point at 99. 
+    Because the dial is a circle, turning the dial left from 0 one click makes it point at 99.
     Similarly, turning the dial right from 99 one click makes it point at 0.
 
-    So, if the dial were pointing at 5, a rotation of L10 would cause it to point at 95. 
+    So, if the dial were pointing at 5, a rotation of L10 would cause it to point at 95.
     After that, a rotation of R5 could cause it to point at 0.
 
     The number of times the dial is left pointing at 0 after any rotation in the sequence.
 
     The dial starts by pointing at 50.
      */
-    let lines = input.split("\n").map(|l| l.chars());
+    let lines = input.lines().map(|l| l.chars());
 
     let mut dial: i16 = 50;
     let mut zeros = 0;
@@ -46,26 +45,26 @@ pub fn part_one(input: &str) -> Option<u64> {
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
-    let lines = input.split('\n');
+    let lines = input.lines();
 
     let mut dial: i32 = 50;
     let mut zeros = 0;
 
     for line in lines {
         let mut chars = line.chars();
-        
+
         // Parse out the direction maybe make an enum later if im feeling fancy
         let direction = match chars.next() {
             Some(c) => c,
             None => continue,
         };
-        
-        // Parse distance 
+
+        // Parse distance
         let dist_str: String = chars.take_while(|x| x.is_numeric()).collect();
-        if dist_str.is_empty() { 
+        if dist_str.is_empty() {
             panic!("Unreachable / Bad Input!")
         }
-        
+
         let dist = dist_str.parse::<i32>().unwrap();
 
         match direction {
@@ -73,18 +72,18 @@ pub fn part_two(input: &str) -> Option<u64> {
                 zeros += (dial + dist) as u64 / 100;
                 dial = (dial + dist) % 100;
             }
-            
+
             'L' => {
                 // I love ternary expressions
                 let dist_to_zero = if dial == 0 { 100 } else { dial };
 
                 if dist >= dist_to_zero {
                     let mut count = 1;
-                    
+
                     // We add one more zero for every subsequent hundred "clicks"
                     let remaining_dist = dist - dist_to_zero;
                     count += remaining_dist / 100;
-                    
+
                     zeros += count as u64;
                 }
 
